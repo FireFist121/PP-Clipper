@@ -334,12 +334,6 @@ export default function App() {
 
           {/* Archive Section */}
           <div className="space-y-8 stagger-2">
-             <div className="flex items-center gap-8">
-                <div className="h-px flex-1 bg-gradient-to-r from-transparent to-white/5" />
-                <h2 className="text-[10px] font-black uppercase tracking-[0.5em] text-white/40">Latest Transmissions</h2>
-                <div className="h-px flex-1 bg-gradient-to-l from-transparent to-white/5" />
-             </div>
-
              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
                 {clips.map((clip, i) => (
                   <div key={i} className={`${glassCard} group/card p-2`}>
