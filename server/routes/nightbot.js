@@ -66,14 +66,21 @@ router.get('/clip', async (req, res) => {
   }
 
   // 5.2 Whitelist check (Strict)
+  if (!user && token === expectedToken) {
+    return res.send('❌ Error: Nightbot command outdated. Please RE-COPY the command from the dashboard Setup Guide (user parameter is missing).');
+  }
+
   const allowedUsers = channel.allowed_users || [];
   const username = (user || '').toLowerCase();
   const channelTitle = (channel.title || '').toLowerCase();
   
-  logger.info(`[Whitelist] Checking user: "${username}" against channel title: "${channelTitle}" and ${allowedUsers.length} allowed users.`);
+  // Debug log (using console.log as backup since winston seems quiet)
+  console.log(`[Whitelist] Checking user: "${username}" against channel title: "${channelTitle}"`);
 
   const isAllowed = allowedUsers.some(u => u.username.toLowerCase() === username) || 
-                    username === channelTitle;
+                    username === channelTitle ||
+                    username.includes(channelTitle) || // Flexible owner check
+                    channelTitle.includes(username);
 
   if (!isAllowed) {
     logger.info(`[Whitelist] Denied live clip for user: ${user} in channel: ${channelId}`);
