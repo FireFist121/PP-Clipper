@@ -101,6 +101,14 @@ const stats = {
     const clipsToday = await Clip.countDocuments({ created_at: { $gte: today } });
     
     const quota = await monitoring.getQuotaUsage();
+    
+    // If Monitoring API is not authenticated, use our local DB counter as the base
+    if (!quota.authenticated) {
+      const usage = await Usage.findOne() || { youtube_calls: 0 };
+      quota.used = Math.max(quota.used, usage.youtube_calls);
+      quota.percent = parseFloat(((quota.used / quota.limit) * 100).toFixed(2));
+    }
+
     const token = await Settings.findOne({ key: 'nightbot_token' });
 
     return {
@@ -113,11 +121,16 @@ const stats = {
     };
   },
   async incrementApiUsage(count = 1) {
-    return await Usage.findOneAndUpdate(
+    const updated = await Usage.findOneAndUpdate(
       {},
       { $inc: { youtube_calls: count } },
       { upsert: true, new: true }
     );
+    // Update the monitoring's local memory to keep it stable
+    if (monitoring._lastUsedValue < updated.youtube_calls) {
+      monitoring._lastUsedValue = updated.youtube_calls;
+    }
+    return updated;
   }
 };
 
