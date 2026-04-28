@@ -250,7 +250,68 @@ export default function App() {
     }`;
 
   if (!isLoggedIn) {
-    // ... (login page is already pretty good, but I'll add the shimmer)
+    return (
+      <div className="min-h-screen bg-[#05000a] text-white selection:bg-[#7c3aed]/30 relative overflow-hidden" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+        <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Syne:wght@800&display=swap');
+          @keyframes drift { 0% { transform: translate(0, 0); } 50% { transform: translate(30px, 30px); } 100% { transform: translate(0, 0); } }
+          .bg-glow { position: absolute; width: 800px; height: 800px; border-radius: 50%; background: radial-gradient(circle, rgba(124,58,237,0.1) 0%, transparent 70%); filter: blur(100px); animation: drift 15s infinite; }
+        `}</style>
+        <div className="bg-glow -top-64 -left-64" />
+        <div className="bg-glow -bottom-64 -right-64" />
+
+        <div className="max-w-7xl mx-auto px-10 py-12 space-y-16 relative z-10">
+          <nav className="flex justify-between items-center pb-8 border-b border-white/5">
+            <div className="flex items-center gap-5 group cursor-pointer" onClick={() => window.location.reload()}>
+              <Icon.Clip size={48} />
+              <div>
+                <span className="text-2xl font-black tracking-tighter uppercase block leading-none" style={{ fontFamily: "'Syne', sans-serif" }}>PP CLIPPER</span>
+                <span className="text-[8px] font-black text-cyan-400 tracking-[0.4em] uppercase mt-1.5 block opacity-60">Public Access Node v3.0</span>
+              </div>
+            </div>
+            <button 
+              onClick={() => {
+                const mail = prompt('Enter Staff Email:');
+                const pass = prompt('Enter Access Key:');
+                if (mail === 'PPClipper@admin.com' && pass === 'FIREFISTDEAD') {
+                  localStorage.setItem('pp_clipper_auth', 'true');
+                  setIsLoggedIn(true);
+                } else { alert('Access Denied.'); }
+              }}
+              className="px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest hover:bg-[#7c3aed] hover:text-white transition-all"
+            >
+              Staff Access
+            </button>
+          </nav>
+
+          <div className="space-y-12 stagger-1">
+             <div className="text-center space-y-4 py-10">
+                <h1 className="text-4xl font-black uppercase tracking-tighter" style={{ fontFamily: "'Syne', sans-serif" }}>Community Archives</h1>
+                <p className="text-xs font-bold text-white/20 tracking-[0.4em] uppercase">Real-time captured moments from the community</p>
+             </div>
+
+             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {clips.map((clip, i) => (
+                  <div key={i} className={`${glassCard} group/card p-2`}>
+                    <div className="relative aspect-video rounded-3xl overflow-hidden mb-6">
+                      <img src={`https://img.youtube.com/vi/${clip.video_id}/maxresdefault.jpg`} className="w-full h-full object-cover group-hover/card:scale-110 transition-transform duration-700" alt={clip.title} />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                      <div className="absolute bottom-4 left-6 right-6">
+                        <div className="text-[10px] font-black text-cyan-400 uppercase tracking-widest mb-1">{clip.clipped_by}</div>
+                        <div className="text-sm font-black text-white line-clamp-1">{clip.title}</div>
+                      </div>
+                      <a href={clip.youtube_url} target="_blank" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 bg-white/10 backdrop-blur-xl rounded-full flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-all duration-500 hover:scale-110 border border-white/20">
+                        <Icon.ExternalLink />
+                      </a>
+                    </div>
+                  </div>
+                ))}
+                {clips.length === 0 && <div className="col-span-full py-20 text-center text-xs font-bold italic text-white/10 uppercase tracking-widest">Archive is empty. Start clipping!</div>}
+             </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -307,7 +368,7 @@ export default function App() {
 
       <div className="max-w-7xl mx-auto px-10 py-12 space-y-16 relative z-10">
         <nav className="flex justify-between items-center pb-8 border-b border-white/5">
-          <div className="flex items-center gap-6 group cursor-pointer">
+          <div className="flex items-center gap-6 group cursor-pointer" onClick={() => window.location.reload()}>
             <div className="transition-all duration-700 group-hover:scale-125 active:scale-95">
               <Icon.Clip size={56} />
             </div>
@@ -318,7 +379,12 @@ export default function App() {
           </div>
           <div className="flex items-center gap-4">
             <div className="text-[8px] font-black text-cyan-400 bg-cyan-400/5 px-4 py-2 rounded-full border border-cyan-400/20 uppercase tracking-[0.2em]">ULTRA-STABLE</div>
-            <button onClick={handleLogout} className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 hover:bg-rose-500/20 transition-all text-white/20 hover:text-rose-500 flex items-center justify-center"><Icon.Logout /></button>
+            <button 
+              onClick={handleLogout} 
+              className="px-6 py-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[10px] font-black uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-all"
+            >
+              Logout Terminal
+            </button>
           </div>
         </nav>
 
