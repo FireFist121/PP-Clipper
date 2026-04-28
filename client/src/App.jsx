@@ -199,6 +199,16 @@ export default function App() {
     }
   };
 
+  const deleteClip = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this clip forever?')) return;
+    try {
+      await axios.delete(`/api/clips/${id}`);
+      fetchData();
+    } catch (err) {
+      console.error('Delete error:', err);
+    }
+  };
+
   const handleLogin = (e) => {
     e.preventDefault();
     const email = e.target.email.value;
@@ -325,6 +335,7 @@ export default function App() {
                         <td className="py-5 px-8 flex gap-3">
                           <button onClick={() => handleCopy(clip)} className="p-2 bg-white/5 rounded-lg hover:bg-[#3b82f6] transition-all">{copiedId === clip.video_id ? <Icon.Check /> : <Icon.Copy />}</button>
                           <a href={clip.youtube_url} target="_blank" className="p-2 bg-white/5 rounded-lg hover:bg-white/10"><Icon.ExternalLink /></a>
+                          <button onClick={() => deleteClip(clip._id)} className="p-2 bg-white/5 rounded-lg hover:bg-rose-500/20 text-rose-500/40 hover:text-rose-500 transition-all"><Icon.Trash /></button>
                         </td>
                       </tr>
                     ))}

@@ -32,6 +32,9 @@ const clips = {
   },
   async findAll({ limit = 50 } = {}) {
     return await Clip.find().sort({ created_at: -1 }).limit(limit);
+  },
+  async delete(id) {
+    return await Clip.findByIdAndDelete(id);
   }
 };
 
