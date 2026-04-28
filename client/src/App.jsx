@@ -186,7 +186,7 @@ export default function App() {
       alert('Channel Authorized Successfully');
     } catch (err) { 
       console.error(err); 
-      alert('Failed to add channel. Make sure it is a valid YouTube link.');
+      alert(`Failed to add channel: ${err.response?.data?.error || err.message}`);
     } finally {
       setIsAdding(false);
     }

@@ -196,13 +196,35 @@ class YouTubeClient {
   }
 
   async getChannelInfoByHandle(handle) {
-    // Handle can be like "@username"
+    // Try direct lookup with forHandle (most reliable for @handles)
+    try {
+      const data = await this._request('/channels', {
+        part: 'snippet',
+        forHandle: handle.startsWith('@') ? handle : `@${handle}`
+      });
+      
+      if (data.items?.length) {
+        const item = data.items[0];
+        return {
+          id: item.id,
+          title: item.snippet.title,
+          handle: item.snippet.customUrl,
+          url: `https://youtube.com/channel/${item.id}`,
+          thumbnail: item.snippet.thumbnails?.default?.url
+        };
+      }
+    } catch (err) {
+      console.warn(`forHandle failed for ${handle}: ${err.message}`);
+    }
+
+    // Fallback to search if forHandle fails or returns nothing
     const searchData = await this._request('/search', {
       part: 'snippet',
       q: handle,
       type: 'channel',
       maxResults: 1
     });
+    
     if (!searchData.items?.length) throw new Error('Channel not found by handle.');
     return this.getChannelInfo(searchData.items[0].id.channelId);
   }
