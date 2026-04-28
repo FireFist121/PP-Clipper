@@ -268,7 +268,7 @@ export default function App() {
 
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-[#020005] text-white selection:bg-[#7c3aed]/30 relative overflow-hidden" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+      <div className="bg-[#020005] text-white selection:bg-[#7c3aed]/30 relative overflow-hidden" style={{ fontFamily: "'DM Sans', sans-serif" }}>
         <style>{`
           @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Syne:wght@800&display=swap');
           @keyframes drift { 0% { transform: translate(0, 0); } 50% { transform: translate(30px, 30px); } 100% { transform: translate(0, 0); } }
@@ -284,7 +284,7 @@ export default function App() {
         <div className="bg-glow -top-64 -left-64" />
         <div className="bg-glow -bottom-64 -right-64" style={{ background: 'radial-gradient(circle, rgba(34,211,238,0.05) 0%, transparent 70%)' }} />
 
-        <div className="max-w-7xl mx-auto px-10 py-8 space-y-12 relative z-10">
+        <div className="max-w-7xl mx-auto px-10 py-4 space-y-6 relative z-10">
           {/* Header */}
           <nav className="flex justify-between items-center">
             <div className="flex items-center gap-5 group cursor-pointer" onClick={() => window.location.reload()}>
@@ -365,8 +365,8 @@ export default function App() {
           </div>
 
           {/* Footer */}
-          <footer className="pt-20 pb-10 text-center relative z-10">
-            <div className="h-px w-32 bg-white/5 mx-auto mb-8" />
+          <footer className="pt-4 pb-4 text-center relative z-10">
+            <div className="h-px w-32 bg-white/5 mx-auto mb-4" />
             <p className="text-[10px] font-black tracking-[0.5em] text-white/10 uppercase">
               MADE BY - <span className="text-white/30 hover:text-cyan-400 transition-colors cursor-default">FIREFIST</span>
             </p>
