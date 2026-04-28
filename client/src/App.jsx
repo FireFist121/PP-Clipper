@@ -161,20 +161,35 @@ export default function App() {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
+  const [isAdding, setIsAdding] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMove = (e) => {
+      setMousePos({ x: (e.clientX / window.innerWidth - 0.5) * 40, y: (e.clientY / window.innerHeight - 0.5) * 40 });
+    };
+    window.addEventListener('mousemove', handleMove);
+    return () => window.removeEventListener('mousemove', handleMove);
+  }, []);
+
   const addChannel = async () => {
     if (!newChannelUrl.trim()) return;
-    const channelId = newChannelUrl.startsWith('UC') ? newChannelUrl : newChannelUrl.split('/').pop();
+    setIsAdding(true);
     try {
       await axios.post('/api/channels', { 
-        channel_id: channelId, 
-        title: newChannelName || channelId, 
-        url: newChannelUrl.startsWith('http') ? newChannelUrl : `https://youtube.com/channel/${newChannelUrl}` 
+        url: newChannelUrl,
+        title: newChannelName 
       });
       fetchData();
       setNewChannelUrl('');
       setNewChannelName('');
-      setSetupModal({ channel_id: channelId });
-    } catch (err) { console.error(err); }
+      alert('Channel Authorized Successfully');
+    } catch (err) { 
+      console.error(err); 
+      alert('Failed to add channel. Make sure it is a valid YouTube link.');
+    } finally {
+      setIsAdding(false);
+    }
   };
 
   const toggleChannel = async (id) => {
@@ -370,14 +385,8 @@ export default function App() {
         
         @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
 
-        .bg-blob { position: absolute; border-radius: 50%; filter: blur(150px); z-index: 0; pointer-events: none; opacity: 0.2; animation: drift 20s linear infinite; }
-        @keyframes drift { 
-          0% { transform: translate(0, 0) scale(1); }
-          33% { transform: translate(100px, 50px) scale(1.2); }
-          66% { transform: translate(-50px, 100px) scale(0.8); }
-          100% { transform: translate(0, 0) scale(1); }
-        }
-
+        .bg-blob { position: absolute; border-radius: 50%; filter: blur(150px); z-index: 0; pointer-events: none; opacity: 0.2; transition: transform 0.2s ease-out; }
+        
         .shimmer { background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%); background-size: 200% 100%; animation: shimmer 3s infinite; }
         @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
 
@@ -390,6 +399,9 @@ export default function App() {
 
         .pulse-ring { position: absolute; inset: -8px; border: 2px solid #22d3ee; border-radius: inherit; animation: pulseRing 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         @keyframes pulseRing { 0% { transform: scale(0.9); opacity: 0.8; } 100% { transform: scale(1.5); opacity: 0; } }
+
+        .processing { animation: rotate 1s linear infinite; }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
       `}</style>
 
       {/* Floating Particles */}
@@ -403,10 +415,10 @@ export default function App() {
         }} />
       ))}
 
-      {/* Decorative Blobs */}
-      <div className="bg-blob w-[1000px] h-[1000px] bg-violet-600/30 -top-96 -left-96" />
-      <div className="bg-blob w-[800px] h-[800px] bg-cyan-400/20 -bottom-96 -right-96" style={{ animationDelay: '-7s' }} />
-      <div className="bg-blob w-[600px] h-[600px] bg-fuchsia-500/10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" style={{ animationDelay: '-12s' }} />
+      {/* Decorative Parallax Blobs */}
+      <div className="bg-blob w-[1000px] h-[1000px] bg-violet-600/30 -top-96 -left-96" style={{ transform: `translate(${mousePos.x}px, ${mousePos.y}px)` }} />
+      <div className="bg-blob w-[800px] h-[800px] bg-cyan-400/20 -bottom-96 -right-96" style={{ transform: `translate(${-mousePos.x}px, ${-mousePos.y}px)` }} />
+      <div className="bg-blob w-[600px] h-[600px] bg-fuchsia-500/10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" style={{ transform: `translate(${mousePos.x * 0.5}px, ${mousePos.y * 0.5}px)` }} />
 
       <div className="max-w-7xl mx-auto px-10 py-12 space-y-16 relative z-10">
         <nav className="flex justify-between items-center pb-8 border-b border-white/5">
@@ -578,8 +590,17 @@ export default function App() {
                 <div className="flex flex-col md:flex-row gap-6">
                   <input type="text" placeholder="Friendly Name (e.g. My Channel)" value={newChannelName} onChange={e => setNewChannelName(e.target.value)} className={inputCls + " flex-1"} />
                   <input type="text" placeholder="YouTube Link / Channel ID" value={newChannelUrl} onChange={e => setNewChannelUrl(e.target.value)} className={inputCls + " flex-1"} />
-                  <button onClick={addChannel} className={accentBtn}>
-                    <Icon.Plus /> AUTHORIZE NODE
+                  <button onClick={addChannel} disabled={isAdding} className={accentBtn}>
+                    {isAdding ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full processing" />
+                        AUTHORIZING...
+                      </>
+                    ) : (
+                      <>
+                        <Icon.Plus /> AUTHORIZE NODE
+                      </>
+                    )}
                   </button>
                 </div>
              </div>
