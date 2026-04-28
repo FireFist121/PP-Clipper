@@ -249,6 +249,8 @@ export default function App() {
         : 'text-white/20 hover:text-white/60 hover:bg-white/5'
     }`;
 
+  const [showLoginModal, setShowLoginModal] = useState(false);
+
   if (!isLoggedIn) {
     return (
       <div className="min-h-screen bg-[#05000a] text-white selection:bg-[#7c3aed]/30 relative overflow-hidden" style={{ fontFamily: "'DM Sans', sans-serif" }}>
@@ -256,6 +258,8 @@ export default function App() {
           @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Syne:wght@800&display=swap');
           @keyframes drift { 0% { transform: translate(0, 0); } 50% { transform: translate(30px, 30px); } 100% { transform: translate(0, 0); } }
           .bg-glow { position: absolute; width: 800px; height: 800px; border-radius: 50%; background: radial-gradient(circle, rgba(124,58,237,0.1) 0%, transparent 70%); filter: blur(100px); animation: drift 15s infinite; }
+          .modal-enter { animation: modalIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+          @keyframes modalIn { from { opacity: 0; transform: scale(0.9) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
         `}</style>
         <div className="bg-glow -top-64 -left-64" />
         <div className="bg-glow -bottom-64 -right-64" />
@@ -270,19 +274,57 @@ export default function App() {
               </div>
             </div>
             <button 
-              onClick={() => {
-                const mail = prompt('Enter Staff Email:');
-                const pass = prompt('Enter Access Key:');
-                if (mail === 'PPClipper@admin.com' && pass === 'FIREFISTDEAD') {
-                  localStorage.setItem('pp_clipper_auth', 'true');
-                  setIsLoggedIn(true);
-                } else { alert('Access Denied.'); }
-              }}
-              className="px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest hover:bg-[#7c3aed] hover:text-white transition-all"
+              onClick={() => setShowLoginModal(true)}
+              className="px-8 py-4 rounded-[1.5rem] bg-gradient-to-br from-[#7c3aed] to-[#6d28d9] text-[10px] font-black uppercase tracking-[0.2em] hover:shadow-[0_0_30px_rgba(124,58,237,0.4)] transition-all active:scale-95"
             >
-              Staff Access
+              Staff Portal
             </button>
           </nav>
+
+          {/* Premium Login Modal */}
+          {showLoginModal && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#03000a]/90 backdrop-blur-md">
+              <div className={`${glassCard} w-full max-w-lg p-14 modal-enter border-t-white/10 relative overflow-hidden`}>
+                <div className="absolute top-0 right-0 w-64 h-64 bg-violet-600/10 blur-[100px] -mr-32 -mt-32" />
+                
+                <div className="flex flex-col items-center gap-8 mb-12 relative z-10">
+                  <div className="transition-all duration-700 hover:scale-110 active:scale-95">
+                    <Icon.Clip size={72} />
+                  </div>
+                  <div className="text-center">
+                    <h2 className="text-3xl font-black text-white tracking-tighter uppercase" style={{ fontFamily: "'Syne', sans-serif" }}>STAFF AUTHORIZATION</h2>
+                    <p className="text-[#7c3aed] font-black text-[10px] tracking-[0.5em] uppercase mt-2">Level 3 Clearance Required</p>
+                  </div>
+                </div>
+
+                <form 
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const mail = e.target.email.value;
+                    const pass = e.target.password.value;
+                    if (mail === 'PPClipper@admin.com' && pass === 'FIREFISTDEAD') {
+                      localStorage.setItem('pp_clipper_auth', 'true');
+                      setIsLoggedIn(true);
+                    } else { alert('Access Denied. Check credentials.'); }
+                  }}
+                  className="space-y-8 relative z-10"
+                >
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black text-white/20 uppercase tracking-widest ml-4">Terminal Email</label>
+                    <input name="email" type="email" placeholder="PPClipper@admin.com" required className="w-full bg-white/[0.03] border border-white/5 text-white rounded-[1.5rem] px-8 py-5 text-sm focus:border-[#7c3aed] focus:ring-8 focus:ring-[#7c3aed]/5 outline-none transition-all" />
+                  </div>
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black text-white/20 uppercase tracking-widest ml-4">Access Protocol Key</label>
+                    <input name="password" type="password" placeholder="••••••••" required className="w-full bg-white/[0.03] border border-white/5 text-white rounded-[1.5rem] px-8 py-5 text-sm focus:border-[#7c3aed] focus:ring-8 focus:ring-[#7c3aed]/5 outline-none transition-all" />
+                  </div>
+                  <div className="flex gap-4">
+                    <button type="button" onClick={() => setShowLoginModal(false)} className="flex-1 px-8 py-5 rounded-[1.5rem] border border-white/10 text-[10px] font-black uppercase tracking-widest hover:bg-white/5 transition-all">Cancel</button>
+                    <button type="submit" className="flex-[2] bg-gradient-to-r from-[#7c3aed] to-[#6d28d9] text-white font-black py-5 rounded-[1.5rem] transition-all uppercase tracking-[0.3em] text-[10px] active:scale-95 shadow-[0_20px_40px_rgba(124,58,237,0.3)]">Authorize Terminal</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
 
           <div className="space-y-12 stagger-1">
              <div className="text-center space-y-4 py-10">
@@ -290,17 +332,17 @@ export default function App() {
                 <p className="text-xs font-bold text-white/20 tracking-[0.4em] uppercase">Real-time captured moments from the community</p>
              </div>
 
-             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 pb-20">
                 {clips.map((clip, i) => (
                   <div key={i} className={`${glassCard} group/card p-2`}>
-                    <div className="relative aspect-video rounded-3xl overflow-hidden mb-6">
+                    <div className="relative aspect-video rounded-[2.5rem] overflow-hidden mb-6">
                       <img src={`https://img.youtube.com/vi/${clip.video_id}/maxresdefault.jpg`} className="w-full h-full object-cover group-hover/card:scale-110 transition-transform duration-700" alt={clip.title} />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-                      <div className="absolute bottom-4 left-6 right-6">
-                        <div className="text-[10px] font-black text-cyan-400 uppercase tracking-widest mb-1">{clip.clipped_by}</div>
-                        <div className="text-sm font-black text-white line-clamp-1">{clip.title}</div>
+                      <div className="absolute bottom-6 left-8 right-8">
+                        <div className="text-[10px] font-black text-cyan-400 uppercase tracking-widest mb-1">Clipped by @{clip.clipped_by}</div>
+                        <div className="text-lg font-black text-white line-clamp-1 tracking-tight">{clip.title}</div>
                       </div>
-                      <a href={clip.youtube_url} target="_blank" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 bg-white/10 backdrop-blur-xl rounded-full flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-all duration-500 hover:scale-110 border border-white/20">
+                      <a href={clip.youtube_url} target="_blank" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-white/10 backdrop-blur-xl rounded-full flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-all duration-500 hover:scale-110 border border-white/20">
                         <Icon.ExternalLink />
                       </a>
                     </div>
