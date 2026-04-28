@@ -50,7 +50,6 @@ class YouTubeClient {
   async getActiveLiveStream(channelId) {
     const liveCacheKey = `live_stream_${channelId}`;
     
-    // Check if we have a cached live stream ID that's less than 5 minutes old
     if (this._cache.has(liveCacheKey)) {
       const cached = this._cache.get(liveCacheKey);
       if (Date.now() < cached.expiresAt) {
@@ -59,7 +58,6 @@ class YouTubeClient {
       }
     }
 
-    // Check if a request for this channel is already in flight
     if (this._pendingStreams.has(liveCacheKey)) {
       logger.info(`Waiting for pending live stream fetch for ${channelId}...`);
       return this._pendingStreams.get(liveCacheKey);
@@ -67,45 +65,54 @@ class YouTubeClient {
 
     const fetchPromise = (async () => {
       try {
-        // 1. Find active live stream via YouTube Channel /live redirect (Cost: 0 Units)
-        logger.info(`Fetching live stream ID via /live redirect for: ${channelId} (0 API units)`);
-        const liveUrl = `https://www.youtube.com/channel/${channelId}/live`;
-        const res = await axios.get(liveUrl, {
-          headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
-        });
-        
-        const match = res.data.match(/<link rel="canonical" href="https:\/\/www\.youtube\.com\/watch\?v=([^"]+)">/);
-        if (!match) {
-           throw new Error(`No active live stream found for channel ${channelId}. The channel may be offline.`);
-        }
-        const videoId = match[1];
+        let videoId = null;
 
-        // 2. Get live streaming details (Low Cost: 1 Unit)
+        try {
+          // 1. Try FAST /live redirect (Cost: 0 Units)
+          logger.info(`Fetching live stream ID via /live redirect for: ${channelId}`);
+          const liveUrl = `https://www.youtube.com/channel/${channelId}/live`;
+          const res = await axios.get(liveUrl, {
+            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+            timeout: 5000
+          });
+          const match = res.data.match(/<link rel="canonical" href="https:\/\/www\.youtube\.com\/watch\?v=([^"]+)">/);
+          if (match) videoId = match[1];
+        } catch (scrapeErr) {
+          logger.warn(`Scrape failed for ${channelId}: ${scrapeErr.message}`);
+        }
+
+        // 2. Fallback to API SEARCH (Cost: 100 Units)
+        if (!videoId) {
+           logger.info(`Falling back to API search for live stream: ${channelId}`);
+           const searchData = await this._request('/search', {
+             part: 'snippet',
+             channelId: channelId,
+             eventType: 'live',
+             type: 'video',
+             order: 'date'
+           }, false);
+           if (searchData.items?.length > 0) videoId = searchData.items[0].id.videoId;
+        }
+
+        if (!videoId) throw new Error(`No active live stream found for channel ${channelId}.`);
+
+        // 3. Get live streaming details (Cost: 1 Unit)
         const videoData = await this._request('/videos', {
           part: 'snippet,liveStreamingDetails',
           id: videoId,
         }, false);
 
-        if (!videoData.items?.length) {
-          throw new Error(`Could not fetch details for live stream ${videoId}.`);
-        }
+        if (!videoData.items?.length) throw new Error(`Could not fetch details for live stream ${videoId}.`);
 
         const videoInfo = videoData.items[0];
-        const actualStartTime = videoInfo.liveStreamingDetails?.actualStartTime;
-
         const streamInfo = {
           id: videoId,
           title: videoInfo.snippet.title,
           url: `https://www.youtube.com/watch?v=${videoId}`,
-          actualStartTime: actualStartTime 
+          actualStartTime: videoInfo.liveStreamingDetails?.actualStartTime 
         };
 
-        // Cache the result for 5 minutes to prevent redundant 100-unit searches
-        this._cache.set(liveCacheKey, { 
-          data: streamInfo, 
-          expiresAt: Date.now() + (5 * 60 * 1000) 
-        });
-
+        this._cache.set(liveCacheKey, { data: streamInfo, expiresAt: Date.now() + (5 * 60 * 1000) });
         return streamInfo;
       } finally {
         this._pendingStreams.delete(liveCacheKey);

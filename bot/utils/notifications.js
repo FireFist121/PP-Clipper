@@ -41,14 +41,16 @@ async function sendLiveClipNotification(stream, timestampedUrl, elapsedStr, cust
 
 async function sendSecurityAlert(logData) {
   const webhookUrl = process.env.DISCORD_WEBHOOK_URL?.trim();
-  if (!webhookUrl) return;
+  if (!webhookUrl) return false;
 
   const content = `🚨 **SECURITY ALERT** 🚨\n\n**Unauthorized Access Attempt Blocked**\n**Channel ID:** \`${logData.channel_id}\`\n**User:** \`${logData.user_name}\`\n**IP Address:** \`${logData.ip}\`\n**Timestamp:** \`${new Date().toLocaleString()}\`\n\n*Dashboard: Check "Suspicious Activity" to block this IP.*`;
 
   try {
     await axios.post(webhookUrl, { content });
+    return true;
   } catch (error) {
     logger.error(`Failed to send security alert:`, error.message);
+    return false;
   }
 }
 
