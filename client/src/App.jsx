@@ -306,8 +306,10 @@ export default function App() {
 
       <div className="max-w-7xl mx-auto px-10 py-12 space-y-16 relative z-10">
         <nav className="flex justify-between items-center pb-8 border-b border-white/5">
-          <div className="flex items-center gap-5 group">
-            <div className="w-14 h-14 bg-gradient-to-br from-[#7c3aed] to-[#22d3ee] rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(124,58,237,0.2)] transition-transform duration-700 group-hover:rotate-6"><Icon.Clip size={28} /></div>
+          <div className="flex items-center gap-6 group cursor-pointer">
+            <div className="transition-all duration-700 group-hover:scale-125 active:scale-95">
+              <Icon.Clip size={56} />
+            </div>
             <div>
               <span className="text-2xl font-black tracking-tighter uppercase block leading-none" style={{ fontFamily: "'Syne', sans-serif" }}>PP CLIPPER</span>
               <span className="text-[8px] font-black text-cyan-400 tracking-[0.4em] uppercase mt-1.5 block opacity-60">Secure Cloud Node v3.0</span>
