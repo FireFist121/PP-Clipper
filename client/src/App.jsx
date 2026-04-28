@@ -293,7 +293,7 @@ export default function App() {
               </div>
               <div>
                 <span className="text-2xl font-black tracking-tighter uppercase block leading-none" style={{ fontFamily: "'Syne', sans-serif" }}>PP CLIPPER</span>
-                <span className="text-[8px] font-black text-cyan-400 tracking-[0.4em] uppercase mt-1.5 block opacity-60">Global Access Node v3.5</span>
+                <span className="text-[8px] font-black text-cyan-400 tracking-[0.4em] uppercase mt-1.5 block opacity-60">Global Access Node v4.0</span>
               </div>
             </div>
             <button 
@@ -351,7 +351,7 @@ export default function App() {
                   </div>
                 ))}
                 {clips.length === 0 && (
-                  <div className="col-span-full py-40 flex flex-col items-center justify-center space-y-8">
+                  <div className="col-span-full py-4 flex flex-col items-center justify-center space-y-8">
                     <div className="w-32 h-32 rounded-full bg-white/[0.02] border border-dashed border-white/10 flex items-center justify-center animate-pulse">
                       <Icon.Clip size={48} className="opacity-10" />
                     </div>
