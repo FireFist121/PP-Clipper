@@ -76,7 +76,8 @@ class MonitoringClient {
         }
         authenticated = true;
       } catch (error) {
-        logger.error('Monitoring Engine: Google API Request failed:', error.response?.data || error.message);
+        const errorData = error.response?.data ? JSON.stringify(error.response.data) : error.message;
+        logger.error(`Monitoring Engine: Google API Request failed: ${errorData}`);
       }
     }
 
@@ -95,6 +96,7 @@ class MonitoringClient {
     };
 
     this._cache = { data: result, timestamp: now };
+    logger.info(`Quota Display: ${finalUsed}/${limit} (${result.percent}% used) [Auth: ${authenticated}]`);
     return result;
   }
 }
