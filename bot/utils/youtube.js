@@ -5,6 +5,7 @@
 
 const axios = require('axios');
 const logger = require('./logger');
+const { stats } = require('../../shared/db');
 
 const YT_API_URL = 'https://www.googleapis.com/youtube/v3';
 
@@ -35,6 +36,11 @@ class YouTubeClient {
       if (useCache) {
         this._cache.set(cacheKey, { data: response.data, expiresAt: Date.now() + this._cacheTTL });
       }
+
+      // Calculate and track cost locally
+      const cost = endpoint.includes('/search') ? 100 : 1;
+      stats.incrementApiUsage(cost).catch(err => logger.error(`Failed to increment API usage: ${err.message}`));
+
       return response.data;
     } catch (error) {
       const msg = error.response?.data?.error?.message || error.message;
