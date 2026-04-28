@@ -13,21 +13,31 @@ router.post('/:id/allowed-users', async (req, res) => {
   try {
     let username = input;
     let channel_url = '';
+    let channel_id = '';
+    let thumbnail = '';
 
-    // If it looks like a URL or handle, try to resolve it
-    if (input.includes('youtube.com') || input.startsWith('@')) {
-      let channelInfo;
-      if (input.includes('channel/')) {
-        const cid = input.split('channel/')[1].split('/')[0];
-        channelInfo = await youtube.getChannelInfo(cid);
-      } else if (input.includes('@') || input.startsWith('@')) {
-        const handle = input.includes('@') ? '@' + input.split('@')[1].split('/')[0] : input;
-        channelInfo = await youtube.getChannelInfoByHandle(handle);
-      }
-      
-      if (channelInfo) {
-        username = channelInfo.title;
-        channel_url = channelInfo.url;
+    // If it looks like a URL, handle, or channel ID, try to resolve it
+    if (input.includes('youtube.com') || input.startsWith('@') || input.startsWith('UC')) {
+      try {
+        let channelInfo;
+        if (input.includes('channel/')) {
+          const cid = input.split('channel/')[1].split('/')[0];
+          channelInfo = await youtube.getChannelInfo(cid);
+        } else if (input.startsWith('UC') && input.length === 24) {
+          channelInfo = await youtube.getChannelInfo(input);
+        } else if (input.includes('@') || input.startsWith('@')) {
+          const handle = input.includes('@') ? '@' + input.split('@')[1].split('/')[0] : input;
+          channelInfo = await youtube.getChannelInfoByHandle(handle);
+        }
+        
+        if (channelInfo) {
+          username = channelInfo.title;
+          channel_url = channelInfo.url;
+          channel_id = channelInfo.id;
+          thumbnail = channelInfo.thumbnail;
+        }
+      } catch (e) {
+        logger.warn(`Failed to fetch channel details for: ${input}. Using raw input as username.`);
       }
     }
 
@@ -39,9 +49,9 @@ router.post('/:id/allowed-users', async (req, res) => {
         return res.status(400).json({ error: 'User already in whitelist' });
     }
 
-    channel.allowed_users.push({ username, channel_url });
+    channel.allowed_users.push({ username, channel_url, channel_id, thumbnail });
     await channel.save();
-    res.json({ success: true, user: { username, channel_url } });
+    res.json({ success: true, user: { username, channel_url, channel_id, thumbnail } });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

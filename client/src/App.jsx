@@ -441,14 +441,19 @@ export default function App() {
                           <p className="text-[10px] text-[#4a5568] italic">Only you (owner) can currently clip.</p>
                         ) : (
                           ch.allowed_users.map(u => (
-                            <div key={u.username} className="flex justify-between items-center bg-white/5 p-2 rounded-lg">
-                              <span className="text-[10px] font-medium truncate">{u.username}</span>
+                            <div key={u.username} className="flex justify-between items-center bg-white/5 p-2 rounded-lg gap-3">
+                              {u.thumbnail ? (
+                                <img src={u.thumbnail} alt={u.username} className="w-6 h-6 rounded-full border border-white/10" />
+                              ) : (
+                                <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-[8px] font-bold">{u.username.charAt(0).toUpperCase()}</div>
+                              )}
+                              <span className="text-[10px] font-medium truncate flex-1">{u.username}</span>
                               <button 
                                 onClick={async () => { 
                                   await axios.delete(`/api/channels/${ch.channel_id}/allowed-users/${u.username}`); 
                                   fetchData(); 
                                 }} 
-                                className="text-rose-500/60 hover:text-rose-500 transition-all"
+                                className="text-rose-500/60 hover:text-rose-500 transition-all p-1"
                               >
                                 <Icon.Close />
                               </button>

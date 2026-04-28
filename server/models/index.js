@@ -16,7 +16,9 @@ const ChannelSchema = new mongoose.Schema({
   clips: { type: Number, default: 0 },
   allowed_users: [{
     username: String,
-    channel_url: String
+    channel_url: String,
+    channel_id: String,
+    thumbnail: String
   }],
   created_at: { type: Date, default: Date.now }
 });
