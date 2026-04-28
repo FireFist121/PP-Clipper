@@ -284,7 +284,7 @@ export default function App() {
         <div className="bg-glow -top-64 -left-64" />
         <div className="bg-glow -bottom-64 -right-64" style={{ background: 'radial-gradient(circle, rgba(34,211,238,0.05) 0%, transparent 70%)' }} />
 
-        <div className="max-w-7xl mx-auto px-10 py-12 space-y-24 relative z-10">
+        <div className="max-w-7xl mx-auto px-10 py-8 space-y-12 relative z-10">
           {/* Header */}
           <nav className="flex justify-between items-center">
             <div className="flex items-center gap-5 group cursor-pointer" onClick={() => window.location.reload()}>
@@ -305,7 +305,7 @@ export default function App() {
           </nav>
 
           {/* Hero Section */}
-          <div className="text-center space-y-10 py-10 stagger-1">
+          <div className="text-center space-y-10 py-4 stagger-1">
              <div className="space-y-4">
                 <div className="inline-block px-4 py-1.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-[9px] font-black uppercase tracking-[0.3em] text-violet-400 mb-4">Real-Time Capture Active</div>
                 <h1 className="text-7xl font-black uppercase tracking-tighter leading-[0.9]" style={{ fontFamily: "'Syne', sans-serif" }}>
@@ -333,7 +333,7 @@ export default function App() {
           </div>
 
           {/* Archive Section */}
-          <div className="space-y-16 stagger-2">
+          <div className="space-y-8 stagger-2">
              <div className="flex items-center gap-8">
                 <div className="h-px flex-1 bg-gradient-to-r from-transparent to-white/5" />
                 <h2 className="text-[10px] font-black uppercase tracking-[0.5em] text-white/40">Latest Transmissions</h2>
