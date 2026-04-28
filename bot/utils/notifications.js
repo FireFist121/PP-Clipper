@@ -18,8 +18,9 @@ const logger = require('./logger');
  * @param {string} timestampedUrl 
  * @param {string} elapsedStr 
  * @param {string} customTitle 
+ * @param {string} username
  */
-async function sendLiveClipNotification(stream, timestampedUrl, elapsedStr, customTitle) {
+async function sendLiveClipNotification(stream, timestampedUrl, elapsedStr, customTitle, username) {
   const webhookUrl = process.env.DISCORD_WEBHOOK_URL?.trim();
   if (!webhookUrl) {
     logger.warn('DISCORD_WEBHOOK_URL is not set. Skipping notification.');
@@ -27,7 +28,8 @@ async function sendLiveClipNotification(stream, timestampedUrl, elapsedStr, cust
   }
 
   const titleToUse = customTitle ? customTitle : stream.title;
-  const content = `${stream.id} | **${titleToUse}**\n\n${elapsedStr}\n${timestampedUrl}\nDelayed by -30 seconds.`;
+  const clippedBy = username ? `\nClipped by @${username}` : '';
+  const content = `${stream.id} | **${titleToUse}**\n\n${elapsedStr}\n${timestampedUrl}${clippedBy}\nDelayed by -30 seconds.`;
 
   try {
     await axios.post(webhookUrl, { content });

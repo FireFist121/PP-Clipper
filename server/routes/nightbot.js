@@ -136,7 +136,7 @@ async function processLiveClipBackground(channelId, customTitle, username) {
     const timestampedUrl = `<https://youtu.be/${stream.id}?t=${elapsedSeconds}>`;
 
     // 3. Send the webhook notification
-    await notifications.sendLiveClipNotification(stream, timestampedUrl, tsDisplay, customTitle);
+    await notifications.sendLiveClipNotification(stream, timestampedUrl, tsDisplay, customTitle, username);
     
     // 4. Track in DB
     await db.stats.incrementApiUsage(2);
@@ -157,7 +157,7 @@ async function processLiveClipBackground(channelId, customTitle, username) {
 async function processVideoBackground(url, customTitle, username) {
     try {
       const video = await youtube.getVideoByUrl(url);
-      await notifications.sendLiveClipNotification(video, video.url, '00:00', customTitle);
+      await notifications.sendLiveClipNotification(video, video.url, '00:00', customTitle, username);
 
       await db.stats.incrementApiUsage(1);
       await db.clips.insert({
