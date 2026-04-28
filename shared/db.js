@@ -106,8 +106,9 @@ const stats = {
     return {
       totalClips,
       clipsToday,
-      youtubeApiCalls: quota.usage,
+      youtubeApiCalls: quota.used,
       youtubeApiLimit: quota.limit,
+      youtubeApiPercent: quota.percent,
       nightbotToken: token?.value || 'MISSING'
     };
   },
