@@ -372,7 +372,6 @@ export default function App() {
             </p>
           </footer>
         </div>
-        </div>
 
         {/* Premium Login Modal */}
         {showLoginModal && (
