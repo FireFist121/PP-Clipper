@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import axios from 'axios';
+import logo from './assets/logo.png';
 import { formatDistanceToNow } from 'date-fns';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
@@ -43,10 +44,8 @@ const Icon = {
       <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
     </svg>
   ),
-  Clip: () => (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>
-    </svg>
+  Clip: ({ size = 18 }) => (
+    <img src={logo} alt="Logo" style={{ width: size, height: size }} className="object-contain" />
   ),
   Bot: () => (
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -279,7 +278,7 @@ export default function App() {
       <div className="max-w-7xl mx-auto px-8 py-8 space-y-10">
         <nav className="flex justify-between items-center pb-8 border-b border-white/5">
           <div className="flex items-center gap-4 group">
-            <div className="w-12 h-12 bg-gradient-to-br from-[#3b82f6] to-[#2563eb] rounded-2xl flex items-center justify-center shadow-lg"><Icon.Clip /></div>
+            <div className="w-12 h-12 bg-gradient-to-br from-[#3b82f6] to-[#2563eb] rounded-2xl flex items-center justify-center shadow-lg"><Icon.Clip size={28} /></div>
             <div>
               <span className="text-2xl font-extrabold tracking-tighter uppercase block leading-none" style={{ fontFamily: "'Syne', sans-serif" }}>PP CLIPPER</span>
               <span className="text-[10px] font-bold text-[#3b82f6] tracking-[0.2em] uppercase mt-1 block">Cloud Engine v2.0</span>
