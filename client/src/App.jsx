@@ -208,6 +208,16 @@ export default function App() {
     }
   };
 
+  const deleteAllClips = async () => {
+    if (!window.confirm('⚠️ WARNING: This will delete ALL generated clips forever. Continue?')) return;
+    try {
+      await axios.delete('/api/clips');
+      fetchData();
+    } catch (err) {
+      console.error('Delete All error:', err);
+    }
+  };
+
   const handleLogin = (e) => {
     e.preventDefault();
     const email = e.target.email.value;
@@ -240,29 +250,37 @@ export default function App() {
 
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-[#050608] flex items-center justify-center p-4 relative overflow-hidden" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+      <div className="min-h-screen bg-[#05000a] flex items-center justify-center p-6 relative overflow-hidden" style={{ fontFamily: "'DM Sans', sans-serif" }}>
         <style>{`
           @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Syne:wght@800&display=swap');
-          @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
-          .bg-glow { position: absolute; width: 600px; height: 600px; border-radius: 50%; background: radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 70%); filter: blur(80px); animation: float 8s ease-in-out infinite; }
+          @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-30px); } }
+          .bg-glow { position: absolute; width: 800px; height: 800px; border-radius: 50%; background: radial-gradient(circle, rgba(124,58,237,0.15) 0%, transparent 70%); filter: blur(100px); animation: float 10s ease-in-out infinite; }
         `}</style>
-        <div className="bg-glow -top-48 -left-48" />
-        <div className="bg-glow -bottom-48 -right-48" style={{ animationDelay: '-4s' }} />
-        <div className="bg-white/[0.02] backdrop-blur-3xl border border-white/10 w-full max-w-md p-10 rounded-[2.5rem] shadow-2xl relative z-10">
-          <div className="flex flex-col items-center gap-6 mb-12">
-            <div className="w-24 h-24 rounded-[2rem] bg-gradient-to-br from-[#3b82f6] to-[#1d4ed8] flex items-center justify-center shadow-2xl">
-              <Icon.Channel />
+        <div className="bg-glow -top-64 -left-64" />
+        <div className="bg-glow -bottom-64 -right-64" style={{ animationDelay: '-5s' }} />
+        
+        <div className="bg-white/[0.01] backdrop-blur-[100px] border border-white/5 w-full max-w-md p-12 rounded-[3rem] shadow-[0_50px_100px_rgba(0,0,0,0.8)] relative z-10 border-t-white/10">
+          <div className="flex flex-col items-center gap-8 mb-14">
+            <div className="w-28 h-28 rounded-[2.5rem] bg-gradient-to-br from-[#7c3aed] to-[#22d3ee] flex items-center justify-center shadow-[0_20px_50px_rgba(124,58,237,0.4)] animate-pulse">
+              <Icon.Clip size={50} />
             </div>
             <div className="text-center">
-              <h1 className="text-4xl font-extrabold text-white mb-2 tracking-tight uppercase" style={{ fontFamily: "'Syne', sans-serif" }}>PP Clipper</h1>
-              <p className="text-[#8a9bb0] font-medium tracking-wide">Made by - FireFist</p>
+              <h1 className="text-5xl font-black text-white mb-3 tracking-tighter uppercase" style={{ fontFamily: "'Syne', sans-serif" }}>PP CLIPPER</h1>
+              <p className="text-[#7c3aed] font-black text-[10px] tracking-[0.5em] uppercase">Private Admin Access</p>
             </div>
           </div>
-          <form onSubmit={handleLogin} className="space-y-6">
-            <input name="email" type="email" defaultValue="PPClipper@admin.com" className="w-full bg-white/5 border border-white/10 text-white rounded-2xl px-5 py-4 text-sm focus:border-[#3b82f6] transition-all" />
-            <input name="password" type="password" placeholder="Password" className="w-full bg-white/5 border border-white/10 text-white rounded-2xl px-5 py-4 text-sm focus:border-[#3b82f6] transition-all" />
-            <button type="submit" className="w-full bg-[#3b82f6] hover:bg-[#2563eb] text-white font-bold py-5 rounded-2xl transition-all uppercase tracking-widest text-xs">Authorize Access</button>
+          <form onSubmit={handleLogin} className="space-y-8">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-white/20 uppercase tracking-widest ml-4">Email Address</label>
+              <input name="email" type="email" defaultValue="PPClipper@admin.com" className="w-full bg-white/[0.03] border border-white/5 text-white rounded-[1.5rem] px-6 py-5 text-sm focus:border-[#7c3aed] focus:ring-8 focus:ring-[#7c3aed]/5 transition-all outline-none" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-white/20 uppercase tracking-widest ml-4">Access Key</label>
+              <input name="password" type="password" placeholder="••••••••" className="w-full bg-white/[0.03] border border-white/5 text-white rounded-[1.5rem] px-6 py-5 text-sm focus:border-[#7c3aed] focus:ring-8 focus:ring-[#7c3aed]/5 transition-all outline-none" />
+            </div>
+            <button type="submit" className="w-full bg-gradient-to-r from-[#7c3aed] to-[#6d28d9] hover:shadow-[0_20px_40px_rgba(124,58,237,0.3)] text-white font-black py-6 rounded-[1.5rem] transition-all uppercase tracking-[0.3em] text-[10px] active:scale-95 border border-white/10">Authorize Terminal</button>
           </form>
+          <p className="text-center mt-12 text-[10px] font-bold text-white/10 uppercase tracking-widest">v3.0 Secure Engine</p>
         </div>
       </div>
     );
@@ -323,9 +341,23 @@ export default function App() {
             </div>
 
             <div className={`${glassCard} overflow-hidden fade-slide-up`} style={{ animationDelay: '0.6s' }}>
-              <div className="p-8 border-b border-white/5 flex flex-wrap gap-6 justify-between items-center">
-                <h2 className="text-lg font-bold">Generated Clips</h2>
-                <input type="text" placeholder="Search clips..." value={search} onChange={e => setSearch(e.target.value)} className={`${inputCls} w-64`} />
+              <div className="p-10 border-b border-white/5 flex flex-wrap gap-8 justify-between items-center bg-white/[0.01]">
+                <div className="space-y-1">
+                  <h2 className="text-2xl font-black tracking-tight" style={{ fontFamily: "'Syne', sans-serif" }}>GENERATED CLIPS</h2>
+                  <p className="text-[10px] font-bold text-white/20 tracking-[0.2em] uppercase">Archive of all captured moments</p>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="relative group">
+                    <input type="text" placeholder="Search archives..." value={search} onChange={e => setSearch(e.target.value)} className={`${inputCls} w-72 !pl-12 hover:bg-white/[0.05]`} />
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#7c3aed] transition-colors"><Icon.Search /></div>
+                  </div>
+                  <button 
+                    onClick={deleteAllClips} 
+                    className="h-12 px-6 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[10px] font-black uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-all duration-500 active:scale-90"
+                  >
+                    Clear Archive
+                  </button>
+                </div>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left">

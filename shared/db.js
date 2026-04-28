@@ -35,6 +35,9 @@ const clips = {
   },
   async delete(id) {
     return await Clip.findByIdAndDelete(id);
+  },
+  async deleteAll() {
+    return await Clip.deleteMany({});
   }
 };
 
