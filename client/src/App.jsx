@@ -268,91 +268,84 @@ export default function App() {
 
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-[#05000a] text-white selection:bg-[#7c3aed]/30 relative overflow-hidden" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+      <div className="min-h-screen bg-[#020005] text-white selection:bg-[#7c3aed]/30 relative overflow-hidden" style={{ fontFamily: "'DM Sans', sans-serif" }}>
         <style>{`
           @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Syne:wght@800&display=swap');
           @keyframes drift { 0% { transform: translate(0, 0); } 50% { transform: translate(30px, 30px); } 100% { transform: translate(0, 0); } }
-          .bg-glow { position: absolute; width: 800px; height: 800px; border-radius: 50%; background: radial-gradient(circle, rgba(124,58,237,0.1) 0%, transparent 70%); filter: blur(100px); animation: drift 15s infinite; }
+          .bg-glow { position: absolute; width: 800px; height: 800px; border-radius: 50%; background: radial-gradient(circle, rgba(124,58,237,0.08) 0%, transparent 70%); filter: blur(120px); animation: drift 15s infinite; }
           .modal-enter { animation: modalIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
           @keyframes modalIn { from { opacity: 0; transform: scale(0.9) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+          .hero-gradient { background: linear-gradient(to bottom, #7c3aed, #22d3ee); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+          .scanline { width: 100%; height: 2px; background: rgba(34, 211, 238, 0.1); position: absolute; top: 0; left: 0; animation: scan 8s linear infinite; pointer-events: none; }
+          @keyframes scan { from { top: 0; } to { top: 100%; } }
         `}</style>
+        
+        <div className="scanline" />
         <div className="bg-glow -top-64 -left-64" />
-        <div className="bg-glow -bottom-64 -right-64" />
+        <div className="bg-glow -bottom-64 -right-64" style={{ background: 'radial-gradient(circle, rgba(34,211,238,0.05) 0%, transparent 70%)' }} />
 
-        <div className="max-w-7xl mx-auto px-10 py-12 space-y-16 relative z-10">
-          <nav className="flex justify-between items-center pb-8 border-b border-white/5">
+        <div className="max-w-7xl mx-auto px-10 py-12 space-y-24 relative z-10">
+          {/* Header */}
+          <nav className="flex justify-between items-center">
             <div className="flex items-center gap-5 group cursor-pointer" onClick={() => window.location.reload()}>
-              <Icon.Clip size={48} />
+              <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:scale-110 group-hover:border-[#7c3aed]/50 transition-all duration-500">
+                <Icon.Clip size={32} />
+              </div>
               <div>
                 <span className="text-2xl font-black tracking-tighter uppercase block leading-none" style={{ fontFamily: "'Syne', sans-serif" }}>PP CLIPPER</span>
-                <span className="text-[8px] font-black text-cyan-400 tracking-[0.4em] uppercase mt-1.5 block opacity-60">Public Access Node v3.0</span>
+                <span className="text-[8px] font-black text-cyan-400 tracking-[0.4em] uppercase mt-1.5 block opacity-60">Global Access Node v3.5</span>
               </div>
             </div>
             <button 
               onClick={() => setShowLoginModal(true)}
-              className="px-8 py-4 rounded-[1.5rem] bg-gradient-to-br from-[#7c3aed] to-[#6d28d9] text-[10px] font-black uppercase tracking-[0.2em] hover:shadow-[0_0_30px_rgba(124,58,237,0.4)] transition-all active:scale-95"
+              className="px-8 py-4 rounded-2xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-[0.2em] hover:bg-[#7c3aed] hover:text-white transition-all shadow-xl active:scale-95"
             >
               Staff Portal
             </button>
           </nav>
 
-          {/* Premium Login Modal */}
-          {showLoginModal && (
-            <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#03000a]/90 backdrop-blur-md">
-              <div className={`${glassCard} w-full max-w-lg p-14 modal-enter border-t-white/10 relative overflow-hidden`}>
-                <div className="absolute top-0 right-0 w-64 h-64 bg-violet-600/10 blur-[100px] -mr-32 -mt-32" />
-                
-                <div className="flex flex-col items-center gap-8 mb-12 relative z-10">
-                  <div className="transition-all duration-700 hover:scale-110 active:scale-95">
-                    <Icon.Clip size={72} />
+          {/* Hero Section */}
+          <div className="text-center space-y-10 py-10 stagger-1">
+             <div className="space-y-4">
+                <div className="inline-block px-4 py-1.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-[9px] font-black uppercase tracking-[0.3em] text-violet-400 mb-4">Real-Time Capture Active</div>
+                <h1 className="text-7xl font-black uppercase tracking-tighter leading-[0.9]" style={{ fontFamily: "'Syne', sans-serif" }}>
+                  COMMAND <span className="hero-gradient">THE FEED</span>
+                </h1>
+                <p className="text-sm font-medium text-white/30 tracking-[0.2em] uppercase max-w-2xl mx-auto leading-relaxed">
+                  The ultimate community-driven archive engine. Instantly capturing the most legendary moments from live streams across the globe.
+                </p>
+             </div>
+             
+             {/* System Status Nodes */}
+             <div className="flex flex-wrap justify-center gap-6">
+                {[
+                  { label: 'Network', value: 'Online', color: 'text-emerald-400' },
+                  { label: 'Uptime', value: '99.9%', color: 'text-cyan-400' },
+                  { label: 'Latency', value: '14ms', color: 'text-violet-400' },
+                  { label: 'Nodes', value: 'Global', color: 'text-fuchsia-400' }
+                ].map((node, i) => (
+                  <div key={i} className="px-6 py-4 rounded-2xl bg-white/[0.02] border border-white/5 flex flex-col items-center gap-1 min-w-[140px]">
+                    <span className="text-[8px] font-black text-white/20 uppercase tracking-widest">{node.label}</span>
+                    <span className={`text-xs font-black uppercase tracking-widest ${node.color}`}>{node.value}</span>
                   </div>
-                  <div className="text-center">
-                    <h2 className="text-3xl font-black text-white tracking-tighter uppercase" style={{ fontFamily: "'Syne', sans-serif" }}>STAFF AUTHORIZATION</h2>
-                    <p className="text-[#7c3aed] font-black text-[10px] tracking-[0.5em] uppercase mt-2">Level 3 Clearance Required</p>
-                  </div>
-                </div>
+                ))}
+             </div>
+          </div>
 
-                <form 
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    const mail = e.target.email.value;
-                    const pass = e.target.password.value;
-                    if (mail === 'PPClipper@admin.com' && pass === 'FIREFISTDEAD') {
-                      localStorage.setItem('pp_clipper_auth', 'true');
-                      setIsLoggedIn(true);
-                    } else { alert('Access Denied. Check credentials.'); }
-                  }}
-                  className="space-y-8 relative z-10"
-                >
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-black text-white/20 uppercase tracking-widest ml-4">Terminal Email</label>
-                    <input name="email" type="email" placeholder="PPClipper@admin.com" required className="w-full bg-white/[0.03] border border-white/5 text-white rounded-[1.5rem] px-8 py-5 text-sm focus:border-[#7c3aed] focus:ring-8 focus:ring-[#7c3aed]/5 outline-none transition-all" />
-                  </div>
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-black text-white/20 uppercase tracking-widest ml-4">Access Protocol Key</label>
-                    <input name="password" type="password" placeholder="••••••••" required className="w-full bg-white/[0.03] border border-white/5 text-white rounded-[1.5rem] px-8 py-5 text-sm focus:border-[#7c3aed] focus:ring-8 focus:ring-[#7c3aed]/5 outline-none transition-all" />
-                  </div>
-                  <div className="flex gap-4">
-                    <button type="button" onClick={() => setShowLoginModal(false)} className="flex-1 px-8 py-5 rounded-[1.5rem] border border-white/10 text-[10px] font-black uppercase tracking-widest hover:bg-white/5 transition-all">Cancel</button>
-                    <button type="submit" className="flex-[2] bg-gradient-to-r from-[#7c3aed] to-[#6d28d9] text-white font-black py-5 rounded-[1.5rem] transition-all uppercase tracking-[0.3em] text-[10px] active:scale-95 shadow-[0_20px_40px_rgba(124,58,237,0.3)]">Authorize Terminal</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
-
-          <div className="space-y-12 stagger-1">
-             <div className="text-center space-y-4 py-10">
-                <h1 className="text-4xl font-black uppercase tracking-tighter" style={{ fontFamily: "'Syne', sans-serif" }}>Community Archives</h1>
-                <p className="text-xs font-bold text-white/20 tracking-[0.4em] uppercase">Real-time captured moments from the community</p>
+          {/* Archive Section */}
+          <div className="space-y-16 pb-32 stagger-2">
+             <div className="flex items-center gap-8">
+                <div className="h-px flex-1 bg-gradient-to-r from-transparent to-white/5" />
+                <h2 className="text-[10px] font-black uppercase tracking-[0.5em] text-white/40">Latest Transmissions</h2>
+                <div className="h-px flex-1 bg-gradient-to-l from-transparent to-white/5" />
              </div>
 
-             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 pb-20">
+             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
                 {clips.map((clip, i) => (
                   <div key={i} className={`${glassCard} group/card p-2`}>
                     <div className="relative aspect-video rounded-[2.5rem] overflow-hidden mb-6">
                       <img src={`https://img.youtube.com/vi/${clip.video_id}/maxresdefault.jpg`} className="w-full h-full object-cover group-hover/card:scale-110 transition-transform duration-700" alt={clip.title} />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent" />
                       <div className="absolute bottom-6 left-8 right-8">
                         <div className="text-[10px] font-black text-cyan-400 uppercase tracking-widest mb-1">Clipped by @{clip.clipped_by}</div>
                         <div className="text-lg font-black text-white line-clamp-1 tracking-tight">{clip.title}</div>
@@ -363,10 +356,65 @@ export default function App() {
                     </div>
                   </div>
                 ))}
-                {clips.length === 0 && <div className="col-span-full py-20 text-center text-xs font-bold italic text-white/10 uppercase tracking-widest">Archive is empty. Start clipping!</div>}
+                {clips.length === 0 && (
+                  <div className="col-span-full py-40 flex flex-col items-center justify-center space-y-8">
+                    <div className="w-32 h-32 rounded-full bg-white/[0.02] border border-dashed border-white/10 flex items-center justify-center animate-pulse">
+                      <Icon.Clip size={48} className="opacity-10" />
+                    </div>
+                    <div className="text-center space-y-2">
+                      <p className="text-xs font-black text-white/10 uppercase tracking-[0.4em]">Listening for transmissions...</p>
+                      <p className="text-[9px] font-medium text-white/5 uppercase tracking-[0.2em]">Use !clip in chat to initiate capture</p>
+                    </div>
+                  </div>
+                )}
              </div>
           </div>
         </div>
+
+        {/* Premium Login Modal */}
+        {showLoginModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#03000a]/90 backdrop-blur-md">
+            <div className={`${glassCard} w-full max-w-lg p-14 modal-enter border-t-white/10 relative overflow-hidden`}>
+              <div className="absolute top-0 right-0 w-64 h-64 bg-violet-600/10 blur-[100px] -mr-32 -mt-32" />
+              
+              <div className="flex flex-col items-center gap-8 mb-12 relative z-10">
+                <div className="transition-all duration-700 hover:scale-110 active:scale-95">
+                  <Icon.Clip size={72} />
+                </div>
+                <div className="text-center">
+                  <h2 className="text-3xl font-black text-white tracking-tighter uppercase" style={{ fontFamily: "'Syne', sans-serif" }}>STAFF AUTHORIZATION</h2>
+                  <p className="text-[#7c3aed] font-black text-[10px] tracking-[0.5em] uppercase mt-2">Level 3 Clearance Required</p>
+                </div>
+              </div>
+
+              <form 
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const mail = e.target.email.value;
+                  const pass = e.target.password.value;
+                  if (mail === 'PPClipper@admin.com' && pass === 'FIREFISTDEAD') {
+                    localStorage.setItem('pp_clipper_auth', 'true');
+                    setIsLoggedIn(true);
+                  } else { alert('Access Denied. Check credentials.'); }
+                }}
+                className="space-y-8 relative z-10"
+              >
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-white/20 uppercase tracking-widest ml-4">Terminal Email</label>
+                  <input name="email" type="email" placeholder="PPClipper@admin.com" required className="w-full bg-white/[0.03] border border-white/5 text-white rounded-[1.5rem] px-8 py-5 text-sm focus:border-[#7c3aed] focus:ring-8 focus:ring-[#7c3aed]/5 outline-none transition-all" />
+                </div>
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-white/20 uppercase tracking-widest ml-4">Access Protocol Key</label>
+                  <input name="password" type="password" placeholder="••••••••" required className="w-full bg-white/[0.03] border border-white/5 text-white rounded-[1.5rem] px-8 py-5 text-sm focus:border-[#7c3aed] focus:ring-8 focus:ring-[#7c3aed]/5 outline-none transition-all" />
+                </div>
+                <div className="flex gap-4">
+                  <button type="button" onClick={() => setShowLoginModal(false)} className="flex-1 px-8 py-5 rounded-[1.5rem] border border-white/10 text-[10px] font-black uppercase tracking-widest hover:bg-white/5 transition-all">Cancel</button>
+                  <button type="submit" className="flex-[2] bg-gradient-to-r from-[#7c3aed] to-[#6d28d9] text-white font-black py-5 rounded-[1.5rem] transition-all uppercase tracking-[0.3em] text-[10px] active:scale-95 shadow-[0_20px_40px_rgba(124,58,237,0.3)]">Authorize Terminal</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
