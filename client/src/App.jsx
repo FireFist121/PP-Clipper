@@ -333,7 +333,7 @@ export default function App() {
           </div>
 
           {/* Archive Section */}
-          <div className="space-y-16 pb-32 stagger-2">
+          <div className="space-y-16 stagger-2">
              <div className="flex items-center gap-8">
                 <div className="h-px flex-1 bg-gradient-to-r from-transparent to-white/5" />
                 <h2 className="text-[10px] font-black uppercase tracking-[0.5em] text-white/40">Latest Transmissions</h2>
@@ -369,6 +369,14 @@ export default function App() {
                 )}
              </div>
           </div>
+
+          {/* Footer */}
+          <footer className="pt-20 pb-10 text-center relative z-10">
+            <div className="h-px w-32 bg-white/5 mx-auto mb-8" />
+            <p className="text-[10px] font-black tracking-[0.5em] text-white/10 uppercase">
+              MADE BY - <span className="text-white/30 hover:text-cyan-400 transition-colors cursor-default">FIREFIST</span>
+            </p>
+          </footer>
         </div>
 
         {/* Premium Login Modal */}
