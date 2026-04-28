@@ -224,17 +224,18 @@ export default function App() {
   };
 
   // ── Styles ─────────────────────────────────────────────────────────────────
-  const bg = 'min-h-screen bg-[#05060b] text-white selection:bg-[#3b82f6]/30';
-  const glassCard = 'bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-2xl transition-all duration-500 hover:border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.4)]';
-  const muted = 'text-[#8a9bb0]';
-  const inputCls = 'bg-white/5 border border-white/10 text-white placeholder-[#4a5568] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#3b82f6] focus:ring-2 focus:ring-[#3b82f6]/20 transition-all';
-  const accentBtn = 'bg-gradient-to-br from-[#3b82f6] to-[#2563eb] hover:from-[#60a5fa] hover:to-[#3b82f6] text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-all duration-300 flex items-center gap-2 cursor-pointer active:scale-95 shadow-[0_10px_20px_rgba(59,130,246,0.2)] hover:shadow-[0_15px_25px_rgba(59,130,246,0.3)]';
+  const bg = 'min-h-screen bg-[#02040a] text-white selection:bg-[#3b82f6]/30 relative overflow-hidden';
+  const glassCard = 'bg-white/[0.02] backdrop-blur-2xl border border-white/5 rounded-[2rem] transition-all duration-700 hover:border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] hover:shadow-[0_30px_70px_rgba(0,0,0,0.6)] hover:-translate-y-1';
+  const muted = 'text-white/40';
+  const inputCls = 'bg-white/[0.03] border border-white/5 text-white placeholder-white/20 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:border-[#3b82f6] focus:ring-4 focus:ring-[#3b82f6]/10 transition-all duration-500';
+  const accentBtn = 'bg-gradient-to-br from-[#3b82f6] via-[#2563eb] to-[#1d4ed8] hover:shadow-[0_20px_40px_rgba(59,130,246,0.4)] text-white text-sm font-bold px-6 py-3 rounded-2xl transition-all duration-500 flex items-center gap-2 cursor-pointer active:scale-95 border border-white/10';
+  const premiumBadge = 'bg-gradient-to-br from-white/[0.05] to-white/[0.01] border border-white/10 rounded-2xl p-3 flex items-center gap-3 transition-all duration-500 hover:border-white/20 hover:bg-white/[0.08] group';
 
   const tabCls = (t) =>
-    `px-5 py-2.5 text-sm font-bold rounded-xl transition-all duration-500 cursor-pointer flex items-center gap-2 ${
+    `px-6 py-3 text-sm font-bold rounded-2xl transition-all duration-700 cursor-pointer flex items-center gap-2 relative overflow-hidden ${
       activeTab === t
-        ? 'bg-[#3b82f6] text-white shadow-[0_10px_25px_rgba(59,130,246,0.3)] scale-105'
-        : 'text-[#8a9bb0] hover:text-white hover:bg-white/5'
+        ? 'bg-white/10 text-white shadow-2xl scale-105 border border-white/10 after:content-[""] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-1 after:bg-[#3b82f6]'
+        : 'text-white/40 hover:text-white hover:bg-white/5'
     }`;
 
   if (!isLoggedIn) {
@@ -271,11 +272,21 @@ export default function App() {
     <div className={bg} style={{ fontFamily: "'DM Sans', sans-serif" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@800&display=swap');
-        .fade-slide-up { animation: fadeSlideUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards; opacity: 0; transform: translateY(10px); }
+        .fade-slide-up { animation: fadeSlideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; transform: translateY(20px); }
         @keyframes fadeSlideUp { to { opacity: 1; transform: translateY(0); } }
+        .bg-blob { position: absolute; border-radius: 50%; filter: blur(120px); z-index: 0; pointer-events: none; opacity: 0.15; animation: pulse 10s ease-in-out infinite; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.15; } 50% { transform: scale(1.2); opacity: 0.25; } }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
       `}</style>
 
-      <div className="max-w-7xl mx-auto px-8 py-8 space-y-10">
+      {/* Decorative Blobs */}
+      <div className="bg-blob w-[600px] h-[600px] bg-blue-600 -top-48 -left-48" />
+      <div className="bg-blob w-[500px] h-[500px] bg-purple-600 -bottom-48 -right-48" style={{ animationDelay: '-5s' }} />
+      <div className="bg-blob w-[400px] h-[400px] bg-emerald-600 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" style={{ animationDelay: '-2s', opacity: 0.05 }} />
+
+      <div className="max-w-7xl mx-auto px-8 py-8 space-y-10 relative z-10">
         <nav className="flex justify-between items-center pb-8 border-b border-white/5">
           <div className="flex items-center gap-4 group">
             <div className="w-12 h-12 bg-gradient-to-br from-[#3b82f6] to-[#2563eb] rounded-2xl flex items-center justify-center shadow-lg"><Icon.Clip size={28} /></div>
@@ -419,44 +430,57 @@ export default function App() {
                 </div>
                 <div className="flex flex-col md:flex-row gap-4">
                   <input type="text" placeholder="Channel Name" value={newChannelName} onChange={e => setNewChannelName(e.target.value)} className={inputCls + " flex-1"} />
-                  <input type="text" placeholder="Channel ID" value={newChannelUrl} onChange={e => setNewChannelUrl(e.target.value)} className={inputCls + " flex-1"} />
+                  <input type="text" placeholder="Channel Link / ID" value={newChannelUrl} onChange={e => setNewChannelUrl(e.target.value)} className={inputCls + " flex-1"} />
                   <button onClick={addChannel} className={accentBtn}><Icon.Plus /> AUTHORIZE</button>
                 </div>
              </div>
-             <div className="grid md:grid-cols-2 gap-6">
+             
+             <div className="grid md:grid-cols-2 gap-8">
                 {channels.map(ch => (
-                  <div key={ch.channel_id} className={`${glassCard} p-8 group flex flex-col`}>
-                    <div className="flex justify-between mb-8">
-                      <div className="w-12 h-12 rounded-xl bg-[#3b82f6]/10 flex items-center justify-center text-[#3b82f6]"><Icon.Channel /></div>
-                      <button onClick={() => deleteChannel(ch.channel_id)} className="p-2 rounded-lg hover:bg-rose-500/20 text-rose-500"><Icon.Trash /></button>
+                  <div key={ch.channel_id} className={`${glassCard} p-10 group flex flex-col relative overflow-hidden`}>
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-3xl -mr-16 -mt-16 group-hover:bg-blue-500/10 transition-all duration-700" />
+                    
+                    <div className="flex justify-between mb-8 relative z-10">
+                      <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-blue-500/20 to-blue-600/5 flex items-center justify-center text-blue-400 border border-blue-500/10"><Icon.Channel /></div>
+                      <button onClick={() => deleteChannel(ch.channel_id)} className="w-10 h-10 rounded-2xl bg-white/5 flex items-center justify-center hover:bg-rose-500/20 text-rose-500/40 hover:text-rose-500 transition-all duration-300"><Icon.Trash /></button>
                     </div>
-                    <h3 className="text-lg font-bold">{ch.title}</h3>
-                    <p className="text-[10px] text-[#4a5568] font-mono mb-6">{ch.channel_id}</p>
+                    
+                    <h3 className="text-2xl font-extrabold tracking-tight mb-1" style={{ fontFamily: "'Syne', sans-serif" }}>{ch.title}</h3>
+                    <p className="text-[10px] font-bold text-white/20 tracking-widest uppercase mb-10">{ch.channel_id}</p>
                     
                     {/* Whitelist Section */}
-                    <div className="flex-1 space-y-4">
-                      <h4 className="text-[10px] font-bold text-[#8a9bb0] uppercase tracking-widest border-b border-white/5 pb-2">Allowed Users</h4>
-                      <div className="space-y-2 max-h-32 overflow-y-auto pr-2 custom-scrollbar">
+                    <div className="flex-1 space-y-6 relative z-10">
+                      <div className="flex justify-between items-center border-b border-white/5 pb-3">
+                        <h4 className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Authorized Crew</h4>
+                        <span className="text-[10px] font-bold text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded-md">{ch.allowed_users?.length || 0}</span>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 gap-3 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
                         {ch.allowed_users?.length === 0 ? (
-                          <p className="text-[10px] text-[#4a5568] italic">Only you (owner) can currently clip.</p>
+                          <div className="py-8 text-center border-2 border-dashed border-white/5 rounded-3xl">
+                            <p className="text-[11px] text-white/20 font-medium italic">Owner-only mode active</p>
+                          </div>
                         ) : (
                           ch.allowed_users.map(u => (
-                            <div key={u.username} className="flex justify-between items-center bg-white/5 p-2 rounded-lg gap-3">
-                              {u.thumbnail ? (
-                                <img src={u.thumbnail} alt={u.username} className="w-6 h-6 rounded-full border border-white/10" />
-                              ) : (
-                                <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-[8px] font-bold">{u.username.charAt(0).toUpperCase()}</div>
-                              )}
+                            <div key={u.username} className={premiumBadge}>
+                              <div className="relative">
+                                {u.thumbnail ? (
+                                  <img src={u.thumbnail} alt={u.username} className="w-10 h-10 rounded-2xl object-cover border border-white/10" />
+                                ) : (
+                                  <div className="w-10 h-10 rounded-2xl bg-white/5 flex items-center justify-center text-xs font-black text-white/20 border border-white/10">{u.username.charAt(0).toUpperCase()}</div>
+                                )}
+                                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-[#02040a] rounded-full shadow-lg" />
+                              </div>
                               <div className="flex flex-col flex-1 truncate">
-                                <span className="text-[10px] font-medium truncate">{u.username}</span>
-                                {u.handle && <span className="text-[8px] text-[#4a5568] truncate">{u.handle}</span>}
+                                <span className="text-xs font-bold text-white/90 truncate">{u.username}</span>
+                                {u.handle && <span className="text-[9px] font-bold text-blue-400/60 tracking-wider truncate">{u.handle}</span>}
                               </div>
                               <button 
                                 onClick={async () => { 
                                   await axios.delete(`/api/channels/${ch.channel_id}/allowed-users/${encodeURIComponent(u.username)}`); 
                                   fetchData(); 
                                 }} 
-                                className="text-rose-500/60 hover:text-rose-500 transition-all p-1"
+                                className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-rose-500/20 text-rose-500 transition-all duration-300"
                               >
                                 <Icon.Close />
                               </button>
@@ -464,11 +488,12 @@ export default function App() {
                           ))
                         )}
                       </div>
-                      <div className="flex gap-2 pt-2">
+                      
+                      <div className="group/input relative">
                         <input 
                           type="text" 
-                          placeholder="User or Link" 
-                          className={inputCls + " flex-1 !py-1.5 !text-[10px]"} 
+                          placeholder="Add user by @handle or link..." 
+                          className={inputCls + " w-full !pl-12"} 
                           onKeyDown={async (e) => {
                             if (e.key === 'Enter' && e.target.value.trim()) {
                               try {
@@ -481,12 +506,17 @@ export default function App() {
                             }
                           }}
                         />
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/input:text-blue-500 transition-colors"><Icon.Plus /></div>
                       </div>
                     </div>
 
-                    <div className="mt-8 pt-8 border-t border-white/5 flex justify-between items-center">
-                       <button onClick={() => setSetupModal(ch)} className="text-[10px] font-bold text-[#3b82f6] hover:underline uppercase">Setup Guide</button>
-                       <button onClick={() => toggleChannel(ch.channel_id)} className={`text-[10px] font-bold px-4 py-2 rounded-xl border transition-all ${ch.active ? 'text-emerald-400 bg-emerald-400/5 border-emerald-400/10' : 'text-rose-400 bg-rose-400/5 border-rose-400/10'}`}>{ch.active ? 'ON' : 'OFF'}</button>
+                    <div className="mt-10 pt-10 border-t border-white/5 flex justify-between items-center relative z-10">
+                       <button onClick={() => setSetupModal(ch)} className="text-[10px] font-black text-blue-400 hover:text-blue-300 transition-colors uppercase tracking-widest flex items-center gap-2">
+                         <Icon.Bot /> Setup Guide
+                       </button>
+                       <button onClick={() => toggleChannel(ch.channel_id)} className={`text-[10px] font-black px-6 py-2.5 rounded-2xl border transition-all duration-500 uppercase tracking-widest ${ch.active ? 'text-emerald-400 bg-emerald-400/5 border-emerald-400/10 shadow-[0_0_20px_rgba(52,211,153,0.1)]' : 'text-rose-400 bg-rose-400/5 border-rose-400/10'}`}>
+                         {ch.active ? 'System Live' : 'System Paused'}
+                       </button>
                     </div>
                   </div>
                 ))}
