@@ -65,7 +65,7 @@ const Icon = {
 };
 
 export default function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem('pp_clipper_auth') === 'true');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [stats, setStats] = useState(null);
   const [clips, setClips] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -231,6 +231,7 @@ export default function App() {
   const handleLogout = () => {
     localStorage.removeItem('pp_clipper_auth');
     setIsLoggedIn(false);
+    window.location.reload();
   };
 
   // ── Styles ─────────────────────────────────────────────────────────────────
@@ -481,8 +482,12 @@ export default function App() {
                     <div className="absolute top-0 right-0 w-48 h-48 bg-violet-500/5 blur-[100px] -mr-24 -mt-24 group-hover/card:bg-violet-500/15 transition-all duration-1000" />
                     
                     <div className="flex justify-between mb-10 relative z-10">
-                      <div className="w-20 h-20 rounded-[2.5rem] bg-gradient-to-br from-[#7c3aed]/20 to-transparent flex items-center justify-center text-[#7c3aed] border border-[#7c3aed]/20 shadow-[0_0_30px_rgba(124,58,237,0.1)] group-hover/card:scale-110 transition-transform duration-700">
-                        <Icon.Channel />
+                      <div className="w-20 h-20 rounded-[2.5rem] bg-gradient-to-br from-[#7c3aed]/20 to-transparent flex items-center justify-center text-[#7c3aed] border border-[#7c3aed]/20 shadow-[0_0_30px_rgba(124,58,237,0.1)] group-hover/card:scale-110 transition-transform duration-700 overflow-hidden">
+                        {ch.thumbnail ? (
+                          <img src={ch.thumbnail} alt={ch.title} className="w-full h-full object-cover" />
+                        ) : (
+                          <Icon.Channel />
+                        )}
                       </div>
                       <button onClick={() => deleteChannel(ch.channel_id)} className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center hover:bg-rose-500/20 text-rose-500/20 hover:text-rose-500 transition-all duration-500"><Icon.Trash /></button>
                     </div>

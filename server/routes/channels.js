@@ -113,10 +113,50 @@ router.get('/', async (req, res) => {
 
 // POST /api/channels
 router.post('/', async (req, res) => {
-  const { channel_id, title, url } = req.body;
-  if (!channel_id) return res.status(400).json({ error: 'channel_id is required' });
-  await channels.upsert({ channel_id, title, url, active: true, clips: 0 });
-  res.json({ success: true });
+  const { channel_id: input_id, title: input_title, url: input_url } = req.body;
+  
+  try {
+    let channel_id = input_id;
+    let title = input_title;
+    let url = input_url;
+    let thumbnail = '';
+
+    // Resolve channel details from YouTube API
+    let channelInfo;
+    if (input_url && input_url.includes('youtube.com')) {
+      if (input_url.includes('channel/')) {
+        channel_id = input_url.split('channel/')[1].split('/')[0];
+      } else if (input_url.includes('@')) {
+        const handle = '@' + input_url.split('@')[1].split('/')[0];
+        channelInfo = await youtube.getChannelInfoByHandle(handle);
+      }
+    }
+
+    if (!channelInfo && channel_id) {
+      channelInfo = await youtube.getChannelInfo(channel_id);
+    }
+
+    if (channelInfo) {
+      channel_id = channelInfo.id;
+      title = channelInfo.title;
+      url = channelInfo.url;
+      thumbnail = channelInfo.thumbnail;
+    }
+
+    if (!channel_id) return res.status(400).json({ error: 'Could not resolve channel_id' });
+
+    await channels.upsert({ 
+      channel_id, 
+      title: title || channel_id, 
+      url: url || `https://youtube.com/channel/${channel_id}`,
+      thumbnail,
+      active: true, 
+      clips: 0 
+    });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // PATCH /api/channels/:id/toggle
