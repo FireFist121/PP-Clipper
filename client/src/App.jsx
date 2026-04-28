@@ -182,6 +182,15 @@ export default function App() {
     try { await axios.delete(`/api/channels/${id}`); fetchData(); } catch (err) { console.error(err); }
   };
 
+  const testWebhook = async () => {
+    try {
+      const res = await axios.post('/api/channels/test-webhook');
+      if (res.data.success) alert('✅ Success! Check your Discord channel.');
+    } catch (err) {
+      alert('❌ Error: ' + (err.response?.data?.error || 'Check Render Environment Variables'));
+    }
+  };
+
   const handleLogin = (e) => {
     e.preventDefault();
     const email = e.target.email.value;
@@ -321,7 +330,12 @@ export default function App() {
         {activeTab === 'channels' && (
           <div className="space-y-8 max-w-4xl mx-auto">
              <div className={`${glassCard} p-10`}>
-                <h2 className="text-xl font-extrabold mb-8" style={{ fontFamily: "'Syne', sans-serif" }}>AUTHORIZE ENGINE</h2>
+                <div className="flex justify-between items-center mb-8">
+                  <h2 className="text-xl font-extrabold" style={{ fontFamily: "'Syne', sans-serif" }}>AUTHORIZE ENGINE</h2>
+                  <button onClick={testWebhook} className="text-[10px] font-bold px-4 py-2 rounded-xl border border-white/10 hover:bg-white/5 transition-all uppercase tracking-widest">
+                    Test Webhook
+                  </button>
+                </div>
                 <div className="flex flex-col md:flex-row gap-4">
                   <input type="text" placeholder="Channel Name" value={newChannelName} onChange={e => setNewChannelName(e.target.value)} className={inputCls + " flex-1"} />
                   <input type="text" placeholder="Channel ID" value={newChannelUrl} onChange={e => setNewChannelUrl(e.target.value)} className={inputCls + " flex-1"} />

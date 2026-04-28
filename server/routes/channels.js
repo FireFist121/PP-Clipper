@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { channels, suspicious_logs, blacklist } = require('../../shared/db');
+const notifications = require('../../bot/utils/notifications');
 
 // GET /api/channels
 router.get('/', async (req, res) => {
@@ -59,6 +60,17 @@ router.post('/blacklist', async (req, res) => {
 router.delete('/blacklist/:ip', async (req, res) => {
   await blacklist.remove(req.params.ip);
   res.json({ success: true });
+});
+
+// POST /api/channels/test-webhook
+router.post('/test-webhook', async (req, res) => {
+  const success = await notifications.sendSecurityAlert({
+    channel_id: 'WEBHOOK_TEST',
+    user_name: 'Admin',
+    ip: req.ip || '127.0.0.1'
+  });
+  if (success) res.json({ success: true });
+  else res.status(500).json({ error: 'Failed to send. Check DISCORD_WEBHOOK_URL on Render.' });
 });
 
 module.exports = router;
