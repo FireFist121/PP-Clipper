@@ -12,6 +12,7 @@ router.post('/:id/allowed-users', async (req, res) => {
 
   try {
     let username = input;
+    let handle = '';
     let channel_url = '';
     let channel_id = '';
     let thumbnail = '';
@@ -26,12 +27,13 @@ router.post('/:id/allowed-users', async (req, res) => {
         } else if (input.startsWith('UC') && input.length === 24) {
           channelInfo = await youtube.getChannelInfo(input);
         } else if (input.includes('@') || input.startsWith('@')) {
-          const handle = input.includes('@') ? '@' + input.split('@')[1].split('/')[0] : input;
-          channelInfo = await youtube.getChannelInfoByHandle(handle);
+          const h = input.includes('@') ? '@' + input.split('@')[1].split('/')[0] : input;
+          channelInfo = await youtube.getChannelInfoByHandle(h);
         }
         
         if (channelInfo) {
           username = channelInfo.title;
+          handle = channelInfo.handle;
           channel_url = channelInfo.url;
           channel_id = channelInfo.id;
           thumbnail = channelInfo.thumbnail;
@@ -49,9 +51,9 @@ router.post('/:id/allowed-users', async (req, res) => {
         return res.status(400).json({ error: 'User already in whitelist' });
     }
 
-    channel.allowed_users.push({ username, channel_url, channel_id, thumbnail });
+    channel.allowed_users.push({ username, handle, channel_url, channel_id, thumbnail });
     await channel.save();
-    res.json({ success: true, user: { username, channel_url, channel_id, thumbnail } });
+    res.json({ success: true, user: { username, handle, channel_url, channel_id, thumbnail } });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

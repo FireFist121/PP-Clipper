@@ -77,10 +77,19 @@ router.get('/clip', async (req, res) => {
   // Debug log (using console.log as backup since winston seems quiet)
   console.log(`[Whitelist] Checking user: "${username}" against channel title: "${channelTitle}"`);
 
-  const isAllowed = allowedUsers.some(u => u.username.toLowerCase() === username) || 
-                    username === channelTitle ||
-                    username.includes(channelTitle) || // Flexible owner check
-                    channelTitle.includes(username);
+  const isAllowed = allowedUsers.some(u => {
+    const uName = (u.username || '').toLowerCase();
+    const uHandle = (u.handle || '').toLowerCase().replace('@', '');
+    const cleanUser = username.replace('@', '');
+    
+    return uName === username || 
+           uHandle === cleanUser || 
+           uName.includes(username) || 
+           username.includes(uName);
+  }) || 
+  username === channelTitle ||
+  username.includes(channelTitle) || 
+  channelTitle.includes(username);
 
   if (!isAllowed) {
     logger.info(`[Whitelist] Denied live clip for user: ${user} in channel: ${channelId}`);

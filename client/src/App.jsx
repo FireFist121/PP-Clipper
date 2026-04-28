@@ -447,7 +447,10 @@ export default function App() {
                               ) : (
                                 <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-[8px] font-bold">{u.username.charAt(0).toUpperCase()}</div>
                               )}
-                              <span className="text-[10px] font-medium truncate flex-1">{u.username}</span>
+                              <div className="flex flex-col flex-1 truncate">
+                                <span className="text-[10px] font-medium truncate">{u.username}</span>
+                                {u.handle && <span className="text-[8px] text-[#4a5568] truncate">{u.handle}</span>}
+                              </div>
                               <button 
                                 onClick={async () => { 
                                   await axios.delete(`/api/channels/${ch.channel_id}/allowed-users/${encodeURIComponent(u.username)}`); 
