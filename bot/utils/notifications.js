@@ -20,7 +20,7 @@ const logger = require('./logger');
  * @param {string} customTitle 
  */
 async function sendLiveClipNotification(stream, timestampedUrl, elapsedStr, customTitle) {
-  const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+  const webhookUrl = process.env.DISCORD_WEBHOOK_URL?.trim();
   if (!webhookUrl) {
     logger.warn('DISCORD_WEBHOOK_URL is not set. Skipping notification.');
     return false;
@@ -40,7 +40,7 @@ async function sendLiveClipNotification(stream, timestampedUrl, elapsedStr, cust
 }
 
 async function sendSecurityAlert(logData) {
-  const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+  const webhookUrl = process.env.DISCORD_WEBHOOK_URL?.trim();
   if (!webhookUrl) return;
 
   const content = `🚨 **SECURITY ALERT** 🚨\n\n**Unauthorized Access Attempt Blocked**\n**Channel ID:** \`${logData.channel_id}\`\n**User:** \`${logData.user_name}\`\n**IP Address:** \`${logData.ip}\`\n**Timestamp:** \`${new Date().toLocaleString()}\`\n\n*Dashboard: Check "Suspicious Activity" to block this IP.*`;
