@@ -224,18 +224,18 @@ export default function App() {
   };
 
   // ── Styles ─────────────────────────────────────────────────────────────────
-  const bg = 'min-h-screen bg-[#02040a] text-white selection:bg-[#3b82f6]/30 relative overflow-hidden';
-  const glassCard = 'bg-white/[0.02] backdrop-blur-2xl border border-white/5 rounded-[2rem] transition-all duration-700 hover:border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] hover:shadow-[0_30px_70px_rgba(0,0,0,0.6)] hover:-translate-y-1';
-  const muted = 'text-white/40';
-  const inputCls = 'bg-white/[0.03] border border-white/5 text-white placeholder-white/20 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:border-[#3b82f6] focus:ring-4 focus:ring-[#3b82f6]/10 transition-all duration-500';
-  const accentBtn = 'bg-gradient-to-br from-[#3b82f6] via-[#2563eb] to-[#1d4ed8] hover:shadow-[0_20px_40px_rgba(59,130,246,0.4)] text-white text-sm font-bold px-6 py-3 rounded-2xl transition-all duration-500 flex items-center gap-2 cursor-pointer active:scale-95 border border-white/10';
-  const premiumBadge = 'bg-gradient-to-br from-white/[0.05] to-white/[0.01] border border-white/10 rounded-2xl p-3 flex items-center gap-3 transition-all duration-500 hover:border-white/20 hover:bg-white/[0.08] group';
+  const bg = 'min-h-screen bg-[#03000a] text-white selection:bg-[#7c3aed]/30 relative overflow-hidden';
+  const glassCard = 'bg-white/[0.01] backdrop-blur-3xl border border-white/5 rounded-[2.5rem] transition-all duration-1000 hover:border-[#7c3aed]/30 shadow-[0_20px_80px_rgba(0,0,0,0.8)] hover:shadow-[0_30px_100px_rgba(124,58,237,0.15)] hover:-translate-y-2';
+  const muted = 'text-white/30';
+  const inputCls = 'bg-white/[0.02] border border-white/5 text-white placeholder-white/10 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-[#7c3aed] focus:ring-8 focus:ring-[#7c3aed]/5 transition-all duration-700';
+  const accentBtn = 'bg-gradient-to-br from-[#7c3aed] via-[#6d28d9] to-[#4c1d95] hover:shadow-[0_20px_50px_rgba(124,58,237,0.5)] text-white text-xs font-black tracking-[0.2em] px-8 py-4 rounded-2xl transition-all duration-700 flex items-center gap-2 cursor-pointer active:scale-90 border border-white/10 uppercase';
+  const premiumBadge = 'bg-gradient-to-br from-[#7c3aed]/10 to-transparent border border-white/5 rounded-3xl p-4 flex items-center gap-4 transition-all duration-700 hover:border-[#7c3aed]/40 hover:bg-[#7c3aed]/20 group relative overflow-hidden';
 
   const tabCls = (t) =>
-    `px-6 py-3 text-sm font-bold rounded-2xl transition-all duration-700 cursor-pointer flex items-center gap-2 relative overflow-hidden ${
+    `px-8 py-3.5 text-xs font-black uppercase tracking-[0.2em] rounded-2xl transition-all duration-1000 cursor-pointer flex items-center gap-3 relative overflow-hidden ${
       activeTab === t
-        ? 'bg-white/10 text-white shadow-2xl scale-105 border border-white/10 after:content-[""] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-1 after:bg-[#3b82f6]'
-        : 'text-white/40 hover:text-white hover:bg-white/5'
+        ? 'bg-[#7c3aed]/20 text-white shadow-[0_0_40px_rgba(124,58,237,0.2)] scale-105 border border-[#7c3aed]/40 after:content-[""] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-1 after:bg-gradient-to-r after:from-cyan-400 after:to-violet-600'
+        : 'text-white/20 hover:text-white/60 hover:bg-white/5'
     }`;
 
   if (!isLoggedIn) {
@@ -282,22 +282,22 @@ export default function App() {
       `}</style>
 
       {/* Decorative Blobs */}
-      <div className="bg-blob w-[600px] h-[600px] bg-blue-600 -top-48 -left-48" />
-      <div className="bg-blob w-[500px] h-[500px] bg-purple-600 -bottom-48 -right-48" style={{ animationDelay: '-5s' }} />
-      <div className="bg-blob w-[400px] h-[400px] bg-emerald-600 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" style={{ animationDelay: '-2s', opacity: 0.05 }} />
+      <div className="bg-blob w-[800px] h-[800px] bg-violet-600/40 -top-64 -left-64" />
+      <div className="bg-blob w-[600px] h-[600px] bg-cyan-400/20 -bottom-64 -right-64" style={{ animationDelay: '-5s' }} />
+      <div className="bg-blob w-[500px] h-[500px] bg-fuchsia-500/10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" style={{ animationDelay: '-2s' }} />
 
-      <div className="max-w-7xl mx-auto px-8 py-8 space-y-10 relative z-10">
-        <nav className="flex justify-between items-center pb-8 border-b border-white/5">
-          <div className="flex items-center gap-4 group">
-            <div className="w-12 h-12 bg-gradient-to-br from-[#3b82f6] to-[#2563eb] rounded-2xl flex items-center justify-center shadow-lg"><Icon.Clip size={28} /></div>
+      <div className="max-w-7xl mx-auto px-8 py-8 space-y-12 relative z-10">
+        <nav className="flex justify-between items-center pb-10 border-b border-white/5">
+          <div className="flex items-center gap-6 group">
+            <div className="w-16 h-16 bg-gradient-to-br from-[#7c3aed] to-[#22d3ee] rounded-3xl flex items-center justify-center shadow-[0_0_30px_rgba(124,58,237,0.3)] transition-transform duration-700 group-hover:rotate-12"><Icon.Clip size={32} /></div>
             <div>
-              <span className="text-2xl font-extrabold tracking-tighter uppercase block leading-none" style={{ fontFamily: "'Syne', sans-serif" }}>PP CLIPPER</span>
-              <span className="text-[10px] font-bold text-[#3b82f6] tracking-[0.2em] uppercase mt-1 block">Cloud Engine v2.0</span>
+              <span className="text-3xl font-extrabold tracking-tighter uppercase block leading-none" style={{ fontFamily: "'Syne', sans-serif" }}>PP CLIPPER</span>
+              <span className="text-[10px] font-black text-cyan-400 tracking-[0.4em] uppercase mt-2 block">Premium Cloud Engine v3.0</span>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="text-[10px] font-bold text-emerald-400 bg-emerald-400/5 px-4 py-2 rounded-full border border-emerald-400/10">LIVE ENGINE</div>
-            <button onClick={handleLogout} className="p-3 rounded-2xl bg-white/5 border border-white/10 hover:bg-rose-500/10 transition-all text-white/40 hover:text-rose-400"><Icon.Logout /></button>
+          <div className="flex items-center gap-6">
+            <div className="text-[10px] font-black text-cyan-400 bg-cyan-400/5 px-6 py-3 rounded-full border border-cyan-400/20 shadow-[0_0_20px_rgba(34,211,238,0.1)] uppercase tracking-[0.2em]">ULTRA-STABLE</div>
+            <button onClick={handleLogout} className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 hover:bg-rose-500/20 transition-all text-white/20 hover:text-rose-500 flex items-center justify-center"><Icon.Logout /></button>
           </div>
         </nav>
 
