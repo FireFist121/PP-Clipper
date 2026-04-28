@@ -36,7 +36,7 @@ app.use('/thumbnails', express.static(path.join(process.cwd(), 'clips', 'thumbna
 app.use(express.static(path.join(process.cwd(), 'client', 'dist')));
 
 // SPA Catch-all: Send index.html for any route not matched by API
-app.get('*', (req, res) => {
+app.get('*', (req, res, next) => {
   if (req.path.startsWith('/api')) return next();
   res.sendFile(path.join(process.cwd(), 'client', 'dist', 'index.html'));
 });
