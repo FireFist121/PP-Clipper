@@ -191,7 +191,7 @@ class YouTubeClient {
       title: data.items[0].snippet.title,
       handle: data.items[0].snippet.customUrl,
       url: `https://youtube.com/channel/${channelId}`,
-      thumbnail: data.items[0].snippet.thumbnails?.default?.url
+      thumbnail: data.items[0].snippet.thumbnails?.high?.url || data.items[0].snippet.thumbnails?.medium?.url || data.items[0].snippet.thumbnails?.default?.url
     };
   }
 

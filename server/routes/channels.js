@@ -138,18 +138,19 @@ router.post('/', async (req, res) => {
 
     if (channelInfo) {
       channel_id = channelInfo.id;
-      title = channelInfo.title;
+      title = channelInfo.title; // Always use official title
       url = channelInfo.url;
       thumbnail = channelInfo.thumbnail;
     }
 
     if (!channel_id) return res.status(400).json({ error: 'Could not resolve channel_id' });
+    if (!thumbnail) return res.status(400).json({ error: 'Could not fetch channel logo from YouTube. Check the link.' });
 
     await channels.upsert({ 
       channel_id, 
-      title: title || channel_id, 
-      url: url || `https://youtube.com/channel/${channel_id}`,
-      thumbnail,
+      title: title, // Use official title
+      url: url,
+      thumbnail: thumbnail, // Save the logo!
       active: true, 
       clips: 0 
     });
