@@ -450,7 +450,7 @@ export default function App() {
                               <span className="text-[10px] font-medium truncate flex-1">{u.username}</span>
                               <button 
                                 onClick={async () => { 
-                                  await axios.delete(`/api/channels/${ch.channel_id}/allowed-users/${u.username}`); 
+                                  await axios.delete(`/api/channels/${ch.channel_id}/allowed-users/${encodeURIComponent(u.username)}`); 
                                   fetchData(); 
                                 }} 
                                 className="text-rose-500/60 hover:text-rose-500 transition-all p-1"

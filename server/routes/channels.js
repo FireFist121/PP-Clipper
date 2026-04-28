@@ -59,12 +59,18 @@ router.post('/:id/allowed-users', async (req, res) => {
 
 // DELETE /api/channels/:id/allowed-users/:username
 router.delete('/:id/allowed-users/:username', async (req, res) => {
-  const channel = await channels.findById(req.params.id);
-  if (!channel) return res.status(404).json({ error: 'Channel not found' });
+  try {
+    const channel = await channels.findById(req.params.id);
+    if (!channel) return res.status(404).json({ error: 'Channel not found' });
 
-  channel.allowed_users = channel.allowed_users.filter(u => u.username !== req.params.username);
-  await channel.save();
-  res.json({ success: true });
+    const usernameToRemove = decodeURIComponent(req.params.username).toLowerCase();
+    channel.allowed_users = channel.allowed_users.filter(u => u.username.toLowerCase() !== usernameToRemove);
+    
+    await channel.save();
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 
