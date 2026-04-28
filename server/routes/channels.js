@@ -125,9 +125,9 @@ router.post('/', async (req, res) => {
     let channelInfo;
     if (input_url && input_url.includes('youtube.com')) {
       if (input_url.includes('channel/')) {
-        channel_id = input_url.split('channel/')[1].split('/')[0];
+        channel_id = input_url.split('channel/')[1].split('/')[0].split('?')[0];
       } else if (input_url.includes('@')) {
-        const handle = '@' + input_url.split('@')[1].split('/')[0];
+        let handle = '@' + input_url.split('@')[1].split('/')[0].split('?')[0];
         channelInfo = await youtube.getChannelInfoByHandle(handle);
       }
     }
