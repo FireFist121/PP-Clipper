@@ -24,18 +24,11 @@ router.get('/clip', async (req, res) => {
     return res.send('❌ Error: Unauthorized. Invalid Nightbot token.');
   }
 
-  // 3. Fallback to URL if user manually types !clip https://...
-  if (url && youtube.isYouTubeUrl(url)) {
-    res.send('✅ Processing specific clip url...');
-    return processVideoBackground(url, title, user).catch(err => logger.error(err));
-  }
-
-  // 4. Live Stream clipping (uses Nightbot's $(channelid) variable)
+  // 3. Strict Monitoring: Only allow registered channels
   if (!channelId) {
     return res.send('❌ Error: Nightbot command misconfigured. Use: !clip $(urlfetch ...?channelId=$(channelid))');
   }
 
-  // 5. Strict Monitoring: Only allow registered channels
   const channel = await db.channels.findById(channelId);
   if (!channel) {
     logger.warn(`Suspicious activity: Unauthorized channel ${channelId} tried to use the !clip link.`);
@@ -45,7 +38,29 @@ router.get('/clip', async (req, res) => {
     return res.send('❌ Error: This channel is not authorized.');
   }
 
-  // 5.1 Check if channel is paused
+  // 4. Fallback to URL if user manually types !clip https://...
+  let finalUrl = url;
+  if (!finalUrl && title && youtube.isYouTubeUrl(title)) {
+    finalUrl = title;
+  }
+
+  if (finalUrl && youtube.isYouTubeUrl(finalUrl)) {
+    // Whitelist check for specific URL clipping
+    const allowedUsers = channel.allowed_users || [];
+    const username = (user || '').toLowerCase();
+    const channelTitle = (channel.title || '').toLowerCase();
+    const isAllowed = allowedUsers.some(u => u.username.toLowerCase() === username) || username === channelTitle;
+
+    if (!isAllowed) {
+      logger.info(`[Whitelist] Denied URL clip for user: ${user} (Channel: ${channel.title})`);
+      return res.send('');
+    }
+
+    res.send('✅ Processing specific clip url...');
+    return processVideoBackground(finalUrl, finalUrl === title ? '' : title, user).catch(err => logger.error(err));
+  }
+
+  // 5. Check if channel is paused
   if (!channel.active) {
     return res.send('⏸️ Error: Clipping is currently PAUSED for this channel.');
   }
@@ -55,11 +70,13 @@ router.get('/clip', async (req, res) => {
   const username = (user || '').toLowerCase();
   const channelTitle = (channel.title || '').toLowerCase();
   
+  logger.info(`[Whitelist] Checking user: "${username}" against channel title: "${channelTitle}" and ${allowedUsers.length} allowed users.`);
+
   const isAllowed = allowedUsers.some(u => u.username.toLowerCase() === username) || 
                     username === channelTitle;
 
   if (!isAllowed) {
-    logger.info(`Ignoring !clip command from unauthorized user: ${user} in channel: ${channelId}`);
+    logger.info(`[Whitelist] Denied live clip for user: ${user} in channel: ${channelId}`);
     return res.send(''); // Return empty to ignore
   }
 
