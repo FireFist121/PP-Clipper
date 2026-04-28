@@ -284,7 +284,7 @@ export default function App() {
         <div className="bg-glow -top-64 -left-64" />
         <div className="bg-glow -bottom-64 -right-64" style={{ background: 'radial-gradient(circle, rgba(34,211,238,0.05) 0%, transparent 70%)' }} />
 
-        <div className="max-w-7xl mx-auto px-10 py-4 space-y-6 relative z-10">
+        <div className="max-w-7xl mx-auto px-10 py-4 space-y-2 relative z-10">
           {/* Header */}
           <nav className="flex justify-between items-center">
             <div className="flex items-center gap-5 group cursor-pointer" onClick={() => window.location.reload()}>
@@ -305,9 +305,9 @@ export default function App() {
           </nav>
 
           {/* Hero Section */}
-          <div className="text-center space-y-10 py-4 stagger-1">
-             <div className="space-y-4">
-                <div className="inline-block px-4 py-1.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-[9px] font-black uppercase tracking-[0.3em] text-violet-400 mb-4">Real-Time Capture Active</div>
+          <div className="text-center space-y-6 py-2 stagger-1">
+             <div className="space-y-2">
+                <div className="inline-block px-4 py-1.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-[9px] font-black uppercase tracking-[0.3em] text-violet-400 mb-2">Real-Time Capture Active</div>
                 <h1 className="text-7xl font-black uppercase tracking-tighter leading-[0.9]" style={{ fontFamily: "'Syne', sans-serif" }}>
                   COMMAND <span className="hero-gradient">THE FEED</span>
                 </h1>
@@ -333,7 +333,7 @@ export default function App() {
           </div>
 
           {/* Archive Section */}
-          <div className="space-y-8 stagger-2">
+          <div className="space-y-2 stagger-2">
              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
                 {clips.map((clip, i) => (
                   <div key={i} className={`${glassCard} group/card p-2`}>
@@ -351,13 +351,13 @@ export default function App() {
                   </div>
                 ))}
                 {clips.length === 0 && (
-                  <div className="col-span-full py-4 flex flex-col items-center justify-center space-y-8">
-                    <div className="w-32 h-32 rounded-full bg-white/[0.02] border border-dashed border-white/10 flex items-center justify-center animate-pulse">
-                      <Icon.Clip size={48} className="opacity-10" />
+                  <div className="col-span-full py-2 flex flex-col items-center justify-center space-y-4">
+                    <div className="w-24 h-24 rounded-full bg-white/[0.02] border border-dashed border-white/10 flex items-center justify-center animate-pulse">
+                      <Icon.Clip size={32} className="opacity-10" />
                     </div>
-                    <div className="text-center space-y-2">
-                      <p className="text-xs font-black text-white/10 uppercase tracking-[0.4em]">Listening for transmissions...</p>
-                      <p className="text-[9px] font-medium text-white/5 uppercase tracking-[0.2em]">Use !clip in chat to initiate capture</p>
+                    <div className="text-center space-y-1">
+                      <p className="text-[10px] font-black text-white/10 uppercase tracking-[0.4em]">Listening for transmissions...</p>
+                      <p className="text-[8px] font-medium text-white/5 uppercase tracking-[0.2em]">Use !clip in chat to initiate capture</p>
                     </div>
                   </div>
                 )}
@@ -365,12 +365,13 @@ export default function App() {
           </div>
 
           {/* Footer */}
-          <footer className="pt-4 pb-4 text-center relative z-10">
+          <footer className="pb-4 text-center relative z-10">
             <div className="h-px w-32 bg-white/5 mx-auto mb-4" />
-            <p className="text-[10px] font-black tracking-[0.5em] text-white/10 uppercase">
-              MADE BY - <span className="text-white/30 hover:text-cyan-400 transition-colors cursor-default">FIREFIST</span>
+            <p className="text-[10px] font-black tracking-[0.5em] text-white/40 uppercase">
+              MADE BY - <span className="text-white/60 hover:text-cyan-400 transition-colors cursor-default">FIREFIST</span>
             </p>
           </footer>
+        </div>
         </div>
 
         {/* Premium Login Modal */}
