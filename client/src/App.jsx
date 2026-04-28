@@ -235,17 +235,17 @@ export default function App() {
 
   // ── Styles ─────────────────────────────────────────────────────────────────
   const bg = 'min-h-screen bg-[#03000a] text-white selection:bg-[#7c3aed]/30 relative overflow-hidden';
-  const glassCard = 'bg-white/[0.01] backdrop-blur-[100px] border border-white/5 rounded-[3rem] transition-all duration-1000 hover:border-[#7c3aed]/50 shadow-[0_20px_80px_rgba(0,0,0,0.9)] hover:shadow-[0_30px_100px_rgba(124,58,237,0.2)] hover:-translate-y-3 group/card relative overflow-hidden';
+  const glassCard = 'bg-white/[0.01] backdrop-blur-[80px] border border-white/5 rounded-[2rem] transition-all duration-700 hover:border-[#7c3aed]/30 shadow-[0_20px_50px_rgba(0,0,0,0.8)] hover:shadow-[0_30px_70px_rgba(124,58,237,0.1)] hover:-translate-y-1.5 group/card relative overflow-hidden';
   const muted = 'text-white/20';
-  const inputCls = 'bg-white/[0.02] border border-white/5 text-white placeholder-white/10 rounded-[1.5rem] px-8 py-5 text-sm focus:outline-none focus:border-[#7c3aed] focus:ring-[12px] focus:ring-[#7c3aed]/5 transition-all duration-700 hover:bg-white/[0.04]';
-  const accentBtn = 'bg-gradient-to-br from-[#7c3aed] via-[#6d28d9] to-[#4c1d95] hover:shadow-[0_20px_60px_rgba(124,58,237,0.6)] text-white text-[10px] font-black tracking-[0.4em] px-10 py-5 rounded-[1.5rem] transition-all duration-700 flex items-center gap-3 cursor-pointer active:scale-90 border border-white/10 uppercase relative overflow-hidden group/btn';
-  const premiumBadge = 'bg-gradient-to-br from-[#7c3aed]/10 to-transparent border border-white/5 rounded-[2rem] p-5 flex items-center gap-5 transition-all duration-1000 hover:border-[#7c3aed]/60 hover:bg-[#7c3aed]/20 group/badge relative overflow-hidden';
+  const inputCls = 'bg-white/[0.02] border border-white/5 text-white placeholder-white/10 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-[#7c3aed] focus:ring-8 focus:ring-[#7c3aed]/5 transition-all duration-700 hover:bg-white/[0.04]';
+  const accentBtn = 'bg-gradient-to-br from-[#7c3aed] via-[#6d28d9] to-[#4c1d95] hover:shadow-[0_20px_40px_rgba(124,58,237,0.4)] text-white text-[10px] font-black tracking-[0.3em] px-8 py-4 rounded-2xl transition-all duration-700 flex items-center gap-2 cursor-pointer active:scale-90 border border-white/10 uppercase relative overflow-hidden group/btn';
+  const premiumBadge = 'bg-gradient-to-br from-[#7c3aed]/10 to-transparent border border-white/5 rounded-3xl p-4 flex items-center gap-4 transition-all duration-700 hover:border-[#7c3aed]/40 hover:bg-[#7c3aed]/20 group/badge relative overflow-hidden';
 
   const tabCls = (t) =>
-    `px-10 py-4.5 text-[10px] font-black uppercase tracking-[0.3em] rounded-[1.5rem] transition-all duration-1000 cursor-pointer flex items-center gap-4 relative overflow-hidden ${
+    `px-8 py-3 text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl transition-all duration-700 cursor-pointer flex items-center gap-3 relative overflow-hidden ${
       activeTab === t
-        ? 'bg-[#7c3aed]/30 text-white shadow-[0_0_50px_rgba(124,58,237,0.3)] scale-110 border border-[#7c3aed]/50 after:content-[""] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-1.5 after:bg-gradient-to-r after:from-cyan-400 after:via-fuchsia-500 after:to-violet-600'
-        : 'text-white/20 hover:text-white/80 hover:bg-white/10'
+        ? 'bg-[#7c3aed]/20 text-white shadow-[0_0_30px_rgba(124,58,237,0.2)] scale-105 border border-[#7c3aed]/40 after:content-[""] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-1 after:bg-gradient-to-r after:from-cyan-400 after:via-fuchsia-500 after:to-violet-600'
+        : 'text-white/20 hover:text-white/60 hover:bg-white/5'
     }`;
 
   if (!isLoggedIn) {
@@ -305,17 +305,17 @@ export default function App() {
       <div className="bg-blob w-[600px] h-[600px] bg-fuchsia-500/10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" style={{ animationDelay: '-12s' }} />
 
       <div className="max-w-7xl mx-auto px-10 py-12 space-y-16 relative z-10">
-        <nav className="flex justify-between items-center pb-10 border-b border-white/5">
-          <div className="flex items-center gap-6 group">
-            <div className="w-16 h-16 bg-gradient-to-br from-[#7c3aed] to-[#22d3ee] rounded-3xl flex items-center justify-center shadow-[0_0_30px_rgba(124,58,237,0.3)] transition-transform duration-700 group-hover:rotate-12"><Icon.Clip size={32} /></div>
+        <nav className="flex justify-between items-center pb-8 border-b border-white/5">
+          <div className="flex items-center gap-5 group">
+            <div className="w-14 h-14 bg-gradient-to-br from-[#7c3aed] to-[#22d3ee] rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(124,58,237,0.2)] transition-transform duration-700 group-hover:rotate-6"><Icon.Clip size={28} /></div>
             <div>
-              <span className="text-3xl font-extrabold tracking-tighter uppercase block leading-none" style={{ fontFamily: "'Syne', sans-serif" }}>PP CLIPPER</span>
-              <span className="text-[10px] font-black text-cyan-400 tracking-[0.4em] uppercase mt-2 block">Premium Cloud Engine v3.0</span>
+              <span className="text-2xl font-black tracking-tighter uppercase block leading-none" style={{ fontFamily: "'Syne', sans-serif" }}>PP CLIPPER</span>
+              <span className="text-[8px] font-black text-cyan-400 tracking-[0.4em] uppercase mt-1.5 block opacity-60">Secure Cloud Node v3.0</span>
             </div>
           </div>
-          <div className="flex items-center gap-6">
-            <div className="text-[10px] font-black text-cyan-400 bg-cyan-400/5 px-6 py-3 rounded-full border border-cyan-400/20 shadow-[0_0_20px_rgba(34,211,238,0.1)] uppercase tracking-[0.2em]">ULTRA-STABLE</div>
-            <button onClick={handleLogout} className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 hover:bg-rose-500/20 transition-all text-white/20 hover:text-rose-500 flex items-center justify-center"><Icon.Logout /></button>
+          <div className="flex items-center gap-4">
+            <div className="text-[8px] font-black text-cyan-400 bg-cyan-400/5 px-4 py-2 rounded-full border border-cyan-400/20 uppercase tracking-[0.2em]">ULTRA-STABLE</div>
+            <button onClick={handleLogout} className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 hover:bg-rose-500/20 transition-all text-white/20 hover:text-rose-500 flex items-center justify-center"><Icon.Logout /></button>
           </div>
         </nav>
 
@@ -325,38 +325,38 @@ export default function App() {
         </div>
 
         {activeTab === 'dashboard' && (
-          <div className="space-y-16 stagger-1">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="space-y-12 stagger-1">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
               {[
                 { label: 'Total Clips', value: stats?.totalClips ?? 0, color: '#a78bfa' },
                 { label: 'Clips Today', value: stats?.clipsToday ?? 0, color: '#22d3ee' },
                 { label: 'API Quota', value: stats?.youtubeApiCalls ?? 0, color: '#f472b6' },
                 { label: 'Blocked IPs', value: blockedIps.length, color: '#f43f5e' },
               ].map(({ label, value, color }, idx) => (
-                <div key={label} className={`${glassCard} p-10 glow-border group/card`} style={{ transitionDelay: `${idx * 0.1}s` }}>
-                  <div className={`text-[10px] font-black uppercase tracking-[0.3em] mb-6 ${muted}`}>{label}</div>
-                  <div className="text-6xl font-black tracking-tighter" style={{ color, filter: `drop-shadow(0 0 20px ${color}44)` }}>{loading ? '...' : value}</div>
-                  <div className="absolute inset-0 shimmer opacity-0 group-hover/card:opacity-100 transition-opacity duration-1000" />
+                <div key={label} className={`${glassCard} p-8 glow-border group/card`} style={{ transitionDelay: `${idx * 0.1}s` }}>
+                  <div className={`text-[9px] font-black uppercase tracking-[0.2em] mb-4 ${muted}`}>{label}</div>
+                  <div className="text-4xl font-black tracking-tighter" style={{ color, filter: `drop-shadow(0 0 15px ${color}33)` }}>{loading ? '...' : value}</div>
+                  <div className="absolute inset-0 shimmer opacity-0 group-hover/card:opacity-100 transition-opacity duration-700" />
                 </div>
               ))}
             </div>
 
             <div className={`${glassCard} glow-border group/card stagger-2`}>
-              <div className="p-12 border-b border-white/5 flex flex-wrap gap-10 justify-between items-center bg-white/[0.01]">
-                <div className="space-y-2">
-                  <h2 className="text-3xl font-black tracking-tight uppercase" style={{ fontFamily: "'Syne', sans-serif" }}>GENERATED ARCHIVE</h2>
-                  <p className="text-[10px] font-black text-[#7c3aed] tracking-[0.4em] uppercase">v3.0 Secure Storage</p>
+              <div className="p-10 border-b border-white/5 flex flex-wrap gap-8 justify-between items-center bg-white/[0.01]">
+                <div className="space-y-1">
+                  <h2 className="text-xl font-black tracking-tight uppercase" style={{ fontFamily: "'Syne', sans-serif" }}>GENERATED ARCHIVE</h2>
+                  <p className="text-[9px] font-black text-[#7c3aed] tracking-[0.3em] uppercase">Private Cloud Storage</p>
                 </div>
-                <div className="flex items-center gap-6">
+                <div className="flex items-center gap-4">
                   <div className="relative group/search">
-                    <input type="text" placeholder="Search data..." value={search} onChange={e => setSearch(e.target.value)} className={`${inputCls} w-80 !pl-16`} />
-                    <div className="absolute left-6 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/search:text-[#7c3aed] transition-colors"><Icon.Search /></div>
+                    <input type="text" placeholder="Search data..." value={search} onChange={e => setSearch(e.target.value)} className={`${inputCls} w-72 !pl-14`} />
+                    <div className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/search:text-[#7c3aed] transition-colors"><Icon.Search /></div>
                   </div>
                   <button 
                     onClick={deleteAllClips} 
-                    className="h-14 px-8 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-rose-500 hover:text-white transition-all duration-700 active:scale-90"
+                    className="h-12 px-6 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[9px] font-black uppercase tracking-[0.2em] hover:bg-rose-500 hover:text-white transition-all duration-700 active:scale-95"
                   >
-                    Clear Terminal
+                    Clear Node
                   </button>
                 </div>
               </div>
