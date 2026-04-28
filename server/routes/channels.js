@@ -2,6 +2,61 @@ const express = require('express');
 const router = express.Router();
 const { channels, suspicious_logs, blacklist } = require('../../shared/db');
 const notifications = require('../../bot/utils/notifications');
+const youtube = require('../../bot/utils/youtube');
+
+
+// POST /api/channels/:id/allowed-users
+router.post('/:id/allowed-users', async (req, res) => {
+  const { input } = req.body; // Can be username or channel link
+  if (!input) return res.status(400).json({ error: 'Input is required' });
+
+  try {
+    let username = input;
+    let channel_url = '';
+
+    // If it looks like a URL or handle, try to resolve it
+    if (input.includes('youtube.com') || input.startsWith('@')) {
+      let channelInfo;
+      if (input.includes('channel/')) {
+        const cid = input.split('channel/')[1].split('/')[0];
+        channelInfo = await youtube.getChannelInfo(cid);
+      } else if (input.includes('@') || input.startsWith('@')) {
+        const handle = input.includes('@') ? '@' + input.split('@')[1].split('/')[0] : input;
+        channelInfo = await youtube.getChannelInfoByHandle(handle);
+      }
+      
+      if (channelInfo) {
+        username = channelInfo.title;
+        channel_url = channelInfo.url;
+      }
+    }
+
+    const channel = await channels.findById(req.params.id);
+    if (!channel) return res.status(404).json({ error: 'Channel not found' });
+
+    // Check if already exists
+    if (channel.allowed_users.some(u => u.username.toLowerCase() === username.toLowerCase())) {
+        return res.status(400).json({ error: 'User already in whitelist' });
+    }
+
+    channel.allowed_users.push({ username, channel_url });
+    await channel.save();
+    res.json({ success: true, user: { username, channel_url } });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE /api/channels/:id/allowed-users/:username
+router.delete('/:id/allowed-users/:username', async (req, res) => {
+  const channel = await channels.findById(req.params.id);
+  if (!channel) return res.status(404).json({ error: 'Channel not found' });
+
+  channel.allowed_users = channel.allowed_users.filter(u => u.username !== req.params.username);
+  await channel.save();
+  res.json({ success: true });
+});
+
 
 // GET /api/channels/suspicious
 router.get('/suspicious', async (req, res) => {

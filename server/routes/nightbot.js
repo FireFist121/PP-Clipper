@@ -50,6 +50,17 @@ router.get('/clip', async (req, res) => {
     return res.send('⏸️ Error: Clipping is currently PAUSED for this channel.');
   }
 
+  // 5.2 Whitelist check
+  if (channel.allowed_users && channel.allowed_users.length > 0) {
+    const isAllowed = channel.allowed_users.some(
+      u => u.username.toLowerCase() === (user || '').toLowerCase()
+    );
+    if (!isAllowed) {
+      logger.info(`Ignoring !clip command from unauthorized user: ${user} in channel: ${channelId}`);
+      return res.send(''); // Return empty to ignore
+    }
+  }
+
   // 6. Immediately respond to Nightbot so it can output to chat
   res.send('🎬 Clipping live stream! Sending to Discord...');
 

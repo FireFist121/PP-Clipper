@@ -425,13 +425,57 @@ export default function App() {
              </div>
              <div className="grid md:grid-cols-2 gap-6">
                 {channels.map(ch => (
-                  <div key={ch.channel_id} className={`${glassCard} p-8 group`}>
+                  <div key={ch.channel_id} className={`${glassCard} p-8 group flex flex-col`}>
                     <div className="flex justify-between mb-8">
                       <div className="w-12 h-12 rounded-xl bg-[#3b82f6]/10 flex items-center justify-center text-[#3b82f6]"><Icon.Channel /></div>
                       <button onClick={() => deleteChannel(ch.channel_id)} className="p-2 rounded-lg hover:bg-rose-500/20 text-rose-500"><Icon.Trash /></button>
                     </div>
                     <h3 className="text-lg font-bold">{ch.title}</h3>
-                    <p className="text-[10px] text-[#4a5568] font-mono">{ch.channel_id}</p>
+                    <p className="text-[10px] text-[#4a5568] font-mono mb-6">{ch.channel_id}</p>
+                    
+                    {/* Whitelist Section */}
+                    <div className="flex-1 space-y-4">
+                      <h4 className="text-[10px] font-bold text-[#8a9bb0] uppercase tracking-widest border-b border-white/5 pb-2">Allowed Users</h4>
+                      <div className="space-y-2 max-h-32 overflow-y-auto pr-2 custom-scrollbar">
+                        {ch.allowed_users?.length === 0 ? (
+                          <p className="text-[10px] text-[#4a5568] italic">No restrictions (Everyone can clip)</p>
+                        ) : (
+                          ch.allowed_users.map(u => (
+                            <div key={u.username} className="flex justify-between items-center bg-white/5 p-2 rounded-lg">
+                              <span className="text-[10px] font-medium truncate">{u.username}</span>
+                              <button 
+                                onClick={async () => { 
+                                  await axios.delete(`/api/channels/${ch.channel_id}/allowed-users/${u.username}`); 
+                                  fetchData(); 
+                                }} 
+                                className="text-rose-500/60 hover:text-rose-500 transition-all"
+                              >
+                                <Icon.Close />
+                              </button>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                      <div className="flex gap-2 pt-2">
+                        <input 
+                          type="text" 
+                          placeholder="User or Link" 
+                          className={inputCls + " flex-1 !py-1.5 !text-[10px]"} 
+                          onKeyDown={async (e) => {
+                            if (e.key === 'Enter' && e.target.value.trim()) {
+                              try {
+                                await axios.post(`/api/channels/${ch.channel_id}/allowed-users`, { input: e.target.value });
+                                e.target.value = '';
+                                fetchData();
+                              } catch (err) {
+                                alert(err.response?.data?.error || 'Failed to add user');
+                              }
+                            }
+                          }}
+                        />
+                      </div>
+                    </div>
+
                     <div className="mt-8 pt-8 border-t border-white/5 flex justify-between items-center">
                        <button onClick={() => setSetupModal(ch)} className="text-[10px] font-bold text-[#3b82f6] hover:underline uppercase">Setup Guide</button>
                        <button onClick={() => toggleChannel(ch.channel_id)} className={`text-[10px] font-bold px-4 py-2 rounded-xl border transition-all ${ch.active ? 'text-emerald-400 bg-emerald-400/5 border-emerald-400/10' : 'text-rose-400 bg-rose-400/5 border-rose-400/10'}`}>{ch.active ? 'ON' : 'OFF'}</button>

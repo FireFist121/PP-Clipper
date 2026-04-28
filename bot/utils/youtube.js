@@ -179,6 +179,32 @@ class YouTubeClient {
       duration: item.contentDetails?.duration,
     };
   }
+
+  async getChannelInfo(channelId) {
+    const data = await this._request('/channels', {
+      part: 'snippet',
+      id: channelId,
+    });
+    if (!data.items?.length) throw new Error('Channel not found.');
+    return {
+      id: channelId,
+      title: data.items[0].snippet.title,
+      url: `https://youtube.com/channel/${channelId}`,
+      thumbnail: data.items[0].snippet.thumbnails?.default?.url
+    };
+  }
+
+  async getChannelInfoByHandle(handle) {
+    // Handle can be like "@username"
+    const searchData = await this._request('/search', {
+      part: 'snippet',
+      q: handle,
+      type: 'channel',
+      maxResults: 1
+    });
+    if (!searchData.items?.length) throw new Error('Channel not found by handle.');
+    return this.getChannelInfo(searchData.items[0].id.channelId);
+  }
 }
 
 module.exports = new YouTubeClient();
