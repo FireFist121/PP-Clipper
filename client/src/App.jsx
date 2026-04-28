@@ -438,7 +438,7 @@ export default function App() {
                       <h4 className="text-[10px] font-bold text-[#8a9bb0] uppercase tracking-widest border-b border-white/5 pb-2">Allowed Users</h4>
                       <div className="space-y-2 max-h-32 overflow-y-auto pr-2 custom-scrollbar">
                         {ch.allowed_users?.length === 0 ? (
-                          <p className="text-[10px] text-[#4a5568] italic">No restrictions (Everyone can clip)</p>
+                          <p className="text-[10px] text-[#4a5568] italic">Only you (owner) can currently clip.</p>
                         ) : (
                           ch.allowed_users.map(u => (
                             <div key={u.username} className="flex justify-between items-center bg-white/5 p-2 rounded-lg">
