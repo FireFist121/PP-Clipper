@@ -588,9 +588,8 @@ export default function App() {
                   </button>
                 </div>
                 <div className="flex flex-col md:flex-row gap-6">
-                  <input type="text" placeholder="Friendly Name (e.g. My Channel)" value={newChannelName} onChange={e => setNewChannelName(e.target.value)} className={inputCls + " flex-1"} />
-                  <input type="text" placeholder="YouTube Link / Channel ID" value={newChannelUrl} onChange={e => setNewChannelUrl(e.target.value)} className={inputCls + " flex-1"} />
-                  <button onClick={addChannel} disabled={isAdding} className={accentBtn}>
+                  <input type="text" placeholder="Paste YouTube Channel Link or @Handle here..." value={newChannelUrl} onChange={e => setNewChannelUrl(e.target.value)} className={inputCls + " flex-[3]"} />
+                  <button onClick={addChannel} disabled={isAdding} className={accentBtn + " flex-1 h-[60px]"}>
                     {isAdding ? (
                       <>
                         <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full processing" />

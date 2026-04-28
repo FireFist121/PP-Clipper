@@ -12,6 +12,7 @@ const ChannelSchema = new mongoose.Schema({
   channel_id: { type: String, unique: true },
   title: String,
   url: String,
+  thumbnail: String,
   active: { type: Boolean, default: true },
   clips: { type: Number, default: 0 },
   allowed_users: [{
