@@ -503,12 +503,21 @@ export default function App() {
               {[
                 { label: 'Total Clips', value: stats?.totalClips ?? 0, color: '#a78bfa' },
                 { label: 'Clips Today', value: stats?.clipsToday ?? 0, color: '#22d3ee' },
-                { label: 'API Quota', value: stats?.youtubeApiCalls ?? 0, color: '#f472b6' },
+                { label: 'API Quota', value: stats?.youtubeApiCalls ?? 0, color: '#f472b6', isQuota: true },
                 { label: 'Blocked IPs', value: blockedIps.length, color: '#f43f5e' },
-              ].map(({ label, value, color }, idx) => (
+              ].map(({ label, value, color, isQuota }, idx) => (
                 <div key={label} className={`${glassCard} p-8 glow-border group/card`} style={{ transitionDelay: `${idx * 0.1}s` }}>
                   <div className={`text-[9px] font-black uppercase tracking-[0.2em] mb-4 ${muted}`}>{label}</div>
-                  <div className="text-4xl font-black tracking-tighter" style={{ color, filter: `drop-shadow(0 0 15px ${color}33)` }}>{loading ? '...' : value}</div>
+                  <div className="flex items-baseline gap-2">
+                    <div className="text-4xl font-black tracking-tighter" style={{ color, filter: `drop-shadow(0 0 15px ${color}33)` }}>
+                      {loading ? '...' : (isQuota ? Math.floor(value) : value)}
+                    </div>
+                    {isQuota && !loading && (
+                      <div className="text-[10px] font-black opacity-40 uppercase tracking-widest">
+                        / {stats?.youtubeApiLimit || 10000} ({((value / (stats?.youtubeApiLimit || 10000)) * 100).toFixed(2)}%)
+                      </div>
+                    )}
+                  </div>
                   <div className="absolute inset-0 shimmer opacity-0 group-hover/card:opacity-100 transition-opacity duration-700" />
                 </div>
               ))}

@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const crypto = require('crypto');
 const { Clip, Channel, SuspiciousLog, BlockedIp, Settings, Usage } = require('../server/models');
+const monitoring = require('../bot/utils/monitoring');
 
 const initDatabase = async () => {
   if (mongoose.connection.readyState >= 1) return;
@@ -99,13 +100,14 @@ const stats = {
     today.setHours(0, 0, 0, 0);
     const clipsToday = await Clip.countDocuments({ created_at: { $gte: today } });
     
-    const usage = await Usage.findOne() || { youtube_calls: 0 };
+    const quota = await monitoring.getQuotaUsage();
     const token = await Settings.findOne({ key: 'nightbot_token' });
 
     return {
       totalClips,
       clipsToday,
-      youtubeApiCalls: usage.youtube_calls,
+      youtubeApiCalls: quota.usage,
+      youtubeApiLimit: quota.limit,
       nightbotToken: token?.value || 'MISSING'
     };
   },
