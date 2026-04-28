@@ -98,24 +98,32 @@ export default function App() {
 
   const fetchData = async () => {
     try {
-      const [statsRes, clipsRes, channelsRes, suspiciousRes, blockedRes] = await Promise.all([
+      const [sRes, cRes, lRes, bRes, slRes] = await Promise.all([
         axios.get('/api/stats'),
-        axios.get('/api/clips?limit=100'),
         axios.get('/api/channels'),
-        axios.get('/api/channels/suspicious'),
-        axios.get('/api/channels/blacklist')
+        axios.get('/api/clips'),
+        axios.get('/api/channels/blacklist'),
+        axios.get('/api/channels/suspicious')
       ]);
-      setStats(statsRes.data);
-      setClips(clipsRes.data);
-      setChannels(channelsRes.data);
-      setSuspiciousLogs(suspiciousRes.data);
-      setBlockedIps(blockedRes.data);
-      setLoading(false);
-      buildChartData(clipsRes.data);
-    } catch (error) {
-      console.error('Data fetch error:', error);
+      setStats(sRes.data);
+      setChannels(cRes.data);
+      setClips(lRes.data);
+      setBlockedIps(bRes.data);
+      setSuspiciousLogs(slRes.data);
+      buildChartData(lRes.data);
+    } catch (err) {
+      console.error('Fetch Error:', err);
+    } finally {
       setLoading(false);
     }
+  };
+
+  const clearSuspiciousLogs = async () => {
+    try { await axios.delete('/api/channels/suspicious'); fetchData(); } catch (err) { console.error(err); }
+  };
+
+  const blockIp = async (ip, reason) => {
+    try { await axios.post('/api/channels/blacklist', { ip, reason }); fetchData(); } catch (err) { console.error(err); }
   };
 
   const buildChartData = (clipsArr) => {
@@ -322,6 +330,69 @@ export default function App() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            </div>
+
+            <div className="grid lg:grid-cols-2 gap-6 pb-20">
+              {/* Suspicious Logs */}
+              <div className={`${glassCard} flex flex-col fade-slide-up`} style={{ animationDelay: '0.8s' }}>
+                <div className="p-8 border-b border-white/5 flex justify-between items-center">
+                  <div>
+                    <h2 className="text-lg font-bold">Suspicious Activity</h2>
+                    <p className={`text-[10px] ${muted}`}>Unauthorized access attempts recorded.</p>
+                  </div>
+                  <button onClick={clearSuspiciousLogs} className="text-[10px] font-bold text-rose-400 hover:underline uppercase">Clear Logs</button>
+                </div>
+                <div className="flex-1 overflow-auto max-h-[400px]">
+                  <table className="w-full text-left">
+                    <tbody className="divide-y border-white/5">
+                      {suspiciousLogs.length === 0 ? (
+                        <tr><td className={`py-10 text-center text-xs ${muted}`}>No threats detected.</td></tr>
+                      ) : (
+                        suspiciousLogs.map((log, i) => (
+                          <tr key={i} className="hover:bg-white/[0.02]">
+                            <td className="py-4 px-8">
+                              <div className="text-xs font-bold text-rose-400">{log.channel_id}</div>
+                              <div className="text-[10px] text-[#4a5568]">{log.ip} · {new Date(log.created_at).toLocaleTimeString()}</div>
+                            </td>
+                            <td className="py-4 px-8 text-right">
+                              <button onClick={() => blockIp(log.ip, 'Suspicious access attempt')} className="text-[10px] font-bold bg-rose-500/10 text-rose-500 px-3 py-1.5 rounded-lg border border-rose-500/10 hover:bg-rose-500 hover:text-white transition-all">BLOCK IP</button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Firewall / Blocked IPs */}
+              <div className={`${glassCard} flex flex-col fade-slide-up`} style={{ animationDelay: '0.9s' }}>
+                <div className="p-8 border-b border-white/5">
+                  <h2 className="text-lg font-bold">System Firewall</h2>
+                  <p className={`text-[10px] ${muted}`}>Currently restricted IP addresses.</p>
+                </div>
+                <div className="flex-1 overflow-auto max-h-[400px]">
+                  <table className="w-full text-left">
+                    <tbody className="divide-y border-white/5">
+                      {blockedIps.length === 0 ? (
+                        <tr><td className={`py-10 text-center text-xs ${muted}`}>Firewall is clean.</td></tr>
+                      ) : (
+                        blockedIps.map((b, i) => (
+                          <tr key={i} className="hover:bg-white/[0.02]">
+                            <td className="py-4 px-8">
+                              <div className="text-xs font-mono font-bold text-white/80">{b.ip}</div>
+                              <div className="text-[10px] text-rose-400/60 uppercase tracking-widest font-bold mt-1">{b.reason || 'BANNED'}</div>
+                            </td>
+                            <td className="py-4 px-8 text-right">
+                              <button onClick={async () => { await axios.delete(`/api/channels/blacklist/${b.ip}`); fetchData(); }} className="text-[10px] font-bold text-emerald-400 bg-emerald-400/5 px-3 py-1.5 rounded-lg border border-emerald-400/10 hover:bg-emerald-400 hover:text-black transition-all">UNBLOCK</button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>

@@ -36,21 +36,18 @@ router.get('/clip', async (req, res) => {
   }
 
   // 5. Strict Monitoring: Only allow registered channels
-  const isAuthorized = await db.channels.findById(channelId);
-  if (!isAuthorized) {
+  const channel = await db.channels.findById(channelId);
+  if (!channel) {
     logger.warn(`Suspicious activity: Unauthorized channel ${channelId} tried to use the !clip link.`);
-    
-    const logEntry = {
-      channel_id: channelId,
-      user_name: user || 'Unknown',
-      query_params: req.query,
-      ip: ip
-    };
-    
+    const logEntry = { channel_id: channelId, user_name: user || 'Unknown', query_params: req.query, ip: ip };
     await db.suspicious_logs.insert(logEntry);
-    notifications.sendSecurityAlert(logEntry); // Send instant Discord alert
+    notifications.sendSecurityAlert(logEntry);
+    return res.send('❌ Error: This channel is not authorized.');
+  }
 
-    return res.send('❌ Error: This channel is not authorized to use this clipper. Contact the administrator.');
+  // 5.1 Check if channel is paused
+  if (!channel.active) {
+    return res.send('⏸️ Error: Clipping is currently PAUSED for this channel.');
   }
 
   // 6. Immediately respond to Nightbot so it can output to chat
