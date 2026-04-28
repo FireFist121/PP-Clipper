@@ -513,8 +513,8 @@ export default function App() {
                       {loading ? '...' : (isQuota ? Math.floor(value) : value)}
                     </div>
                     {isQuota && !loading && (
-                      <div className="text-[10px] font-black opacity-40 uppercase tracking-widest">
-                        / {stats?.youtubeApiLimit || 10000} ({((value / (stats?.youtubeApiLimit || 10000)) * 100).toFixed(2)}%)
+                      <div className="text-[10px] font-black opacity-60 uppercase tracking-widest">
+                        / {stats?.youtubeApiLimit || 10000} ({((value / (stats?.youtubeApiLimit || 10000)) * 100).toFixed(2)}% used)
                       </div>
                     )}
                   </div>
