@@ -503,7 +503,6 @@ export default function App() {
               {[
                 { label: 'Total Clips', value: stats?.totalClips ?? 0, color: '#a78bfa' },
                 { label: 'Clips Today', value: stats?.clipsToday ?? 0, color: '#22d3ee' },
-                { label: 'API Quota', value: stats?.youtubeApiCalls ?? 0, color: '#f472b6', isQuota: true },
                 { label: 'Blocked IPs', value: blockedIps.length, color: '#f43f5e' },
               ].map(({ label, value, color, isQuota }, idx) => (
                 <div key={label} className={`${glassCard} p-8 glow-border group/card`} style={{ transitionDelay: `${idx * 0.1}s` }}>
