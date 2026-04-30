@@ -77,7 +77,7 @@ const Icon = {
 };
 
 export default function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('pp_clipper_token'));
   const [user, setUser] = useState(null);
   const [sessions, setSessions] = useState([]);
   const [stats, setStats] = useState(null);
@@ -323,6 +323,17 @@ export default function App() {
     }`;
 
   const [showLoginModal, setShowLoginModal] = useState(false);
+
+  if (loading && !isLoggedIn) {
+    return (
+      <div className="min-h-screen bg-[#03000a] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-6">
+          <div className="w-16 h-16 border-4 border-violet-500/20 border-t-violet-500 rounded-full processing" />
+          <div className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em]">Establishing Secure Link...</div>
+        </div>
+      </div>
+    );
+  }
 
   if (!isLoggedIn) {
     return (
