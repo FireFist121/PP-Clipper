@@ -39,3 +39,10 @@ Thumbs.db
 
 # FFmpeg binaries (if downloaded locally)
 bin/
+
+# Temporary files
+scratch/
+*.mp4
+*.webm
+*.part
+*-player-script.js

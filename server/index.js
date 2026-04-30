@@ -27,9 +27,11 @@ app.use('/api/nightbot', require('./routes/nightbot'));
 app.use('/api/clips', require('./routes/clips'));
 app.use('/api/stats', require('./routes/stats'));
 app.use('/api/channels', require('./routes/channels'));
+app.use('/api/downloader', require('./routes/downloader'));
 
 // Serve downloaded clips statically (so dashboard can play them)
 app.use('/clips', express.static(path.join(process.cwd(), 'clips', 'downloads')));
+app.use('/clips/manual', express.static(path.join(process.cwd(), 'clips', 'downloads', 'manual')));
 app.use('/thumbnails', express.static(path.join(process.cwd(), 'clips', 'thumbnails')));
 
 // Serve Frontend (Compiled Client)
