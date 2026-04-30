@@ -104,31 +104,38 @@ export default function App() {
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem('pp_clipper_token');
-      if (token) {
-        try {
-          const res = await axios.get('/api/auth/me');
-          setUser(res.data);
-          setIsLoggedIn(true);
-        } catch (err) {
-          localStorage.removeItem('pp_clipper_token');
-        }
+      if (!token) {
+        setLoading(false);
+        return;
       }
-      setLoading(false);
+      
+      try {
+        const res = await axios.get('/api/auth/me');
+        console.log('Auth Success:', res.data.user);
+        setUser(res.data);
+        setIsLoggedIn(true);
+      } catch (err) {
+        console.error('Auth Error:', err.response?.status);
+        localStorage.removeItem('pp_clipper_token');
+        setIsLoggedIn(false);
+      } finally {
+        setLoading(false);
+      }
     };
     checkAuth();
   }, []);
 
   useEffect(() => {
-    if (isLoggedIn) {
+    if (isLoggedIn && !loading) {
       fetchData();
       fetchSessions();
       const interval = setInterval(() => {
         fetchData();
         fetchSessions();
-      }, 10000);
+      }, 15000);
       return () => clearInterval(interval);
     }
-  }, [isLoggedIn]);
+  }, [isLoggedIn, loading]);
 
   const fetchSessions = async () => {
     try {
