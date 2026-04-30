@@ -5,6 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const logger = require('../../bot/utils/logger');
 const { DIRS } = require('../../shared/storage');
+const { ytDlp, ffmpeg } = require('../../shared/binaries');
 
 // Create manual download dir if it doesn't exist
 const MANUAL_DIR = path.join(DIRS.downloads, 'manual');
@@ -28,8 +29,8 @@ router.post('/download', async (req, res) => {
         const outputFilename = `segment_${timestamp}.${format === 'audio' ? 'mp3' : 'mp4'}`;
         const outputPath = path.join(MANUAL_DIR, outputFilename);
 
-        const ytDlpPath = path.join(process.cwd(), 'bin', 'yt-dlp.exe');
-        const ffmpegPath = path.join(process.cwd(), 'bin', 'ffmpeg.exe');
+        const ytDlpPath = ytDlp;
+        const ffmpegPath = ffmpeg;
 
         let args;
 
