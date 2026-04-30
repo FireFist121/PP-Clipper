@@ -1,8 +1,10 @@
 import axios from 'axios';
 
+const apiURL = import.meta.env.VITE_API_URL || '';
+
 const instance = axios.create({
-  baseURL: '',
-  withCredentials: true // Required for cookies
+  baseURL: apiURL,
+  withCredentials: true 
 });
 
 // Intercept requests to add the access token
@@ -25,8 +27,8 @@ instance.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        // Attempt to refresh the token
-        const res = await axios.get('/api/auth/refresh', { withCredentials: true });
+        // Attempt to refresh the token using raw axios to avoid interceptor loop
+        const res = await axios.get(`${apiURL}/api/auth/refresh`, { withCredentials: true });
         const { accessToken } = res.data;
 
         // Store new token
@@ -38,7 +40,6 @@ instance.interceptors.response.use(
       } catch (refreshError) {
         // Refresh failed, clear everything
         window.localStorage.removeItem('pp_clipper_access_token');
-        // Optional: window.location.href = '/login'; or let AuthContext handle it
         return Promise.reject(refreshError);
       }
     }

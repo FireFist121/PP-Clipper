@@ -97,14 +97,14 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (user && !loading) {
+    if (user) {
       fetchData();
       const interval = setInterval(() => {
         fetchData();
       }, 15000);
       return () => clearInterval(interval);
     }
-  }, [user, loading]);
+  }, [user]);
 
   const fetchData = async () => {
     try {

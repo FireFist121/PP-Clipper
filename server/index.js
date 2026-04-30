@@ -50,12 +50,16 @@ app.use(cors({ origin: true, credentials: true })); // Allow credentials for coo
 app.use(express.json());
 app.use(cookieParser());
 
+const { authenticateToken } = require('./middleware/authenticate');
+
 // Routes
 app.use('/api/nightbot', require('./routes/nightbot'));
-app.use('/api/clips', require('./routes/clips'));
-app.use('/api/stats', require('./routes/stats'));
-app.use('/api/channels', require('./routes/channels'));
 app.use('/api/auth', require('./routes/auth'));
+
+// Protected Routes
+app.use('/api/clips', authenticateToken, require('./routes/clips'));
+app.use('/api/stats', authenticateToken, require('./routes/stats'));
+app.use('/api/channels', authenticateToken, require('./routes/channels'));
 
 // Serve downloaded clips statically (so dashboard can play them)
 app.use('/clips', express.static(path.join(process.cwd(), 'clips', 'downloads')));
