@@ -1,17 +1,14 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import axios from 'axios';
+import api from './api/axiosInstance';
+import { useAuth } from './context/AuthContext';
+import SessionsList from './components/settings/SessionsList';
+import SecondaryPasswordModal from './components/settings/SecondaryPasswordModal';
+import SecondaryPasswordForm from './components/settings/SecondaryPasswordForm';
 import logo from './assets/logo.png';
 import { formatDistanceToNow } from 'date-fns';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
-
-// Axios Interceptor for Authorization
-axios.interceptors.request.use((config) => {
-  const token = localStorage.getItem('pp_clipper_token');
-  if (token) config.headers['Authorization'] = token;
-  return config;
-});
 
 // ─── Icons ───────────────────────────────────────────────────────────────────
 const Icon = {
@@ -77,9 +74,7 @@ const Icon = {
 };
 
 export default function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('pp_clipper_token'));
-  const [user, setUser] = useState(null);
-  const [sessions, setSessions] = useState([]);
+  const { user, login, logout, loading: authLoading } = useAuth();
   const [stats, setStats] = useState(null);
   const [clips, setClips] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -102,56 +97,23 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const token = localStorage.getItem('pp_clipper_token');
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-      
-      try {
-        const res = await axios.get('/api/auth/me');
-        console.log('Auth Success:', res.data.user);
-        setUser(res.data);
-        setIsLoggedIn(true);
-      } catch (err) {
-        console.error('Auth Error:', err.response?.status);
-        localStorage.removeItem('pp_clipper_token');
-        setIsLoggedIn(false);
-      } finally {
-        setLoading(false);
-      }
-    };
-    checkAuth();
-  }, []);
-
-  useEffect(() => {
-    if (isLoggedIn && !loading) {
+    if (user && !loading) {
       fetchData();
-      fetchSessions();
       const interval = setInterval(() => {
         fetchData();
-        fetchSessions();
       }, 15000);
       return () => clearInterval(interval);
     }
-  }, [isLoggedIn, loading]);
-
-  const fetchSessions = async () => {
-    try {
-      const res = await axios.get('/api/auth/sessions');
-      setSessions(res.data);
-    } catch (err) { console.error(err); }
-  };
+  }, [user, loading]);
 
   const fetchData = async () => {
     try {
       const [sRes, cRes, lRes, bRes, slRes] = await Promise.all([
-        axios.get('/api/stats'),
-        axios.get('/api/channels'),
-        axios.get('/api/clips'),
-        axios.get('/api/channels/blacklist'),
-        axios.get('/api/channels/suspicious')
+        api.get('/api/stats'),
+        api.get('/api/channels'),
+        api.get('/api/clips'),
+        api.get('/api/channels/blacklist'),
+        api.get('/api/channels/suspicious')
       ]);
       setStats(sRes.data);
       setChannels(cRes.data);
@@ -167,11 +129,11 @@ export default function App() {
   };
 
   const clearSuspiciousLogs = async () => {
-    try { await axios.delete('/api/channels/suspicious'); fetchData(); } catch (err) { console.error(err); }
+    try { await api.delete('/api/channels/suspicious'); fetchData(); } catch (err) { console.error(err); }
   };
 
   const blockIp = async (ip, reason) => {
-    try { await axios.post('/api/channels/blacklist', { ip, reason }); fetchData(); } catch (err) { console.error(err); }
+    try { await api.post('/api/channels/blacklist', { ip, reason }); fetchData(); } catch (err) { console.error(err); }
   };
 
   const buildChartData = (clipsArr) => {
@@ -225,7 +187,7 @@ export default function App() {
     if (!newChannelUrl.trim()) return;
     setIsAdding(true);
     try {
-      await axios.post('/api/channels', { 
+      await api.post('/api/channels', { 
         url: newChannelUrl,
         title: newChannelName 
       });
@@ -243,19 +205,19 @@ export default function App() {
 
   const toggleChannel = async (id) => {
     try {
-      await axios.patch(`/api/channels/${id}/toggle`);
+      await api.patch(`/api/channels/${id}/toggle`);
       fetchData();
     } catch (err) { console.error(err); }
   };
 
   const deleteChannel = async (id) => {
     if (!window.confirm('Delete this channel?')) return;
-    try { await axios.delete(`/api/channels/${id}`); fetchData(); } catch (err) { console.error(err); }
+    try { await api.delete(`/api/channels/${id}`); fetchData(); } catch (err) { console.error(err); }
   };
 
   const testWebhook = async () => {
     try {
-      const res = await axios.post('/api/channels/test-webhook');
+      const res = await api.post('/api/channels/test-webhook');
       if (res.data.success) alert('✅ Success! Check your Discord channel.');
     } catch (err) {
       alert('❌ Error: ' + (err.response?.data?.error || 'Check Render Environment Variables'));
@@ -265,7 +227,7 @@ export default function App() {
   const deleteClip = async (id) => {
     if (!window.confirm('Are you sure you want to delete this clip forever?')) return;
     try {
-      await axios.delete(`/api/clips/${id}`);
+      await api.delete(`/api/clips/${id}`);
       fetchData();
     } catch (err) {
       console.error('Delete error:', err);
@@ -275,7 +237,7 @@ export default function App() {
   const deleteAllClips = async () => {
     if (!window.confirm('⚠️ WARNING: This will delete ALL generated clips forever. Continue?')) return;
     try {
-      await axios.delete('/api/clips');
+      await api.delete('/api/clips');
       fetchData();
     } catch (err) {
       console.error('Delete All error:', err);
@@ -286,32 +248,19 @@ export default function App() {
     e.preventDefault();
     const email = e.target.email.value;
     const password = e.target.password.value;
-    try {
-      const res = await axios.post('/api/auth/login', { email, password });
-      localStorage.setItem('pp_clipper_token', res.data.token);
-      setUser(res.data);
-      setIsLoggedIn(true);
-    } catch (err) {
-      alert(err.response?.data?.error || 'Login failed');
-    }
+    const result = await login(email, password);
+    if (!result.success) alert(result.error);
   };
 
   const handleLogout = async () => {
-    try { await axios.post('/api/auth/logout'); } catch(e){}
-    localStorage.removeItem('pp_clipper_token');
-    setIsLoggedIn(false);
+    await logout();
     window.location.reload();
   };
 
-  const logoutOther = async (sessionId) => {
-    const masterPassword = window.prompt('Enter Session Master Password to logout this device:');
-    if (!masterPassword) return;
-    try {
-      await axios.post('/api/auth/sessions/logout-other', { sessionId, masterPassword });
-      fetchSessions();
-    } catch (err) {
-      alert(err.response?.data?.error || 'Failed to logout session');
-    }
+  const [sessionModal, setSessionModal] = useState({ isOpen: false, targetId: null });
+
+  const requestLogout = (id) => {
+    setSessionModal({ isOpen: true, targetId: id });
   };
 
   // ── Styles ─────────────────────────────────────────────────────────────────
@@ -331,7 +280,7 @@ export default function App() {
 
   const [showLoginModal, setShowLoginModal] = useState(false);
 
-  if (loading && !isLoggedIn) {
+  if (authLoading) {
     return (
       <div className="min-h-screen bg-[#03000a] flex items-center justify-center">
         <div className="flex flex-col items-center gap-6">
@@ -342,7 +291,7 @@ export default function App() {
     );
   }
 
-  if (!isLoggedIn) {
+  if (!user) {
     return (
       <div className="bg-[#020005] text-white selection:bg-[#7c3aed]/30 relative overflow-hidden" style={{ fontFamily: "'DM Sans', sans-serif" }}>
         <style>{`
@@ -466,15 +415,7 @@ export default function App() {
               </div>
 
               <form 
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const mail = e.target.email.value;
-                  const pass = e.target.password.value;
-                  if (mail === 'PPClipper@admin.com' && pass === 'FIREFISTDEAD') {
-                    localStorage.setItem('pp_clipper_auth', 'true');
-                    setIsLoggedIn(true);
-                  } else { alert('Access Denied. Check credentials.'); }
-                }}
+                onSubmit={handleLogin}
                 className="space-y-8 relative z-10"
               >
                 <div className="space-y-3">
@@ -697,7 +638,7 @@ export default function App() {
                               <div className="text-[10px] text-white/20 uppercase tracking-[0.3em] font-black mt-1">{b.reason || 'PERMANENT BAN'}</div>
                             </td>
                             <td className="py-6 px-10 text-right">
-                              <button onClick={async () => { await axios.delete(`/api/channels/blacklist/${b.ip}`); fetchData(); }} className="text-[10px] font-black text-cyan-400 bg-cyan-400/10 px-5 py-2.5 rounded-xl border border-cyan-400/20 hover:bg-cyan-400 hover:text-black transition-all uppercase tracking-widest">DE-RESTRICT</button>
+                               <button onClick={async () => { await api.delete(`/api/channels/blacklist/${b.ip}`); fetchData(); }} className="text-[10px] font-black text-cyan-400 bg-cyan-400/10 px-5 py-2.5 rounded-xl border border-cyan-400/20 hover:bg-cyan-400 hover:text-black transition-all uppercase tracking-widest">DE-RESTRICT</button>
                             </td>
                           </tr>
                         ))
@@ -711,78 +652,32 @@ export default function App() {
         )}
 
         {activeTab === 'settings' && (
-          <div className="space-y-12 max-w-5xl mx-auto stagger-1">
+          <div className="max-w-5xl mx-auto stagger-1 space-y-12">
             <div className={`${glassCard} p-12 glow-border group/card`}>
-              <div className="flex justify-between items-center mb-10">
-                <div className="space-y-2">
-                  <h2 className="text-2xl font-black tracking-tight uppercase" style={{ fontFamily: "'Syne', sans-serif" }}>SESSION MANAGEMENT</h2>
-                  <p className="text-[10px] font-black text-cyan-400 tracking-[0.4em] uppercase">Control Active Terminal Logins</p>
-                </div>
-                <div className="text-right">
-                   <div className="text-[8px] font-black text-white/20 uppercase tracking-[0.2em] mb-1">Authenticated As</div>
-                   <div className="text-xs font-black text-[#7c3aed] uppercase tracking-widest">{user?.user}</div>
-                </div>
+              <div className="mb-12">
+                <h2 className="text-3xl font-black tracking-tight uppercase mb-2" style={{ fontFamily: "'Syne', sans-serif" }}>SECURITY TERMINAL</h2>
+                <p className="text-[10px] font-black text-cyan-400 tracking-[0.4em] uppercase">Control Access & Authorization</p>
               </div>
 
-              <div className="overflow-hidden rounded-[2rem] border border-white/5 bg-white/[0.01]">
-                <table className="w-full text-left">
-                  <thead className="bg-white/5">
-                    <tr>
-                      <th className="py-5 px-10 text-[10px] font-black uppercase tracking-widest text-white/40">Device / IP</th>
-                      <th className="py-5 px-10 text-[10px] font-black uppercase tracking-widest text-white/40">Status</th>
-                      <th className="py-5 px-10 text-[10px] font-black uppercase tracking-widest text-white/40 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y border-white/5">
-                    {sessions.map((s) => (
-                      <tr key={s.id} className={`hover:bg-white/[0.02] transition-colors ${s.is_current ? 'bg-[#7c3aed]/5' : ''}`}>
-                        <td className="py-8 px-10">
-                          <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-[#7c3aed]">
-                              <Icon.Bot />
-                            </div>
-                            <div>
-                              <div className="text-sm font-black text-white">{s.device}</div>
-                              <div className="text-[10px] font-black text-white/20 uppercase tracking-widest mt-0.5">{s.ip}</div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="py-8 px-10">
-                          {s.is_current ? (
-                            <span className="px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[8px] font-black uppercase tracking-widest">Current Terminal</span>
-                          ) : (
-                            <div className="space-y-1">
-                               <span className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white/40 text-[8px] font-black uppercase tracking-widest">Active Session</span>
-                               <div className="text-[7px] text-white/10 font-black uppercase tracking-widest ml-1">Last active {new Date(s.last_active).toLocaleTimeString()}</div>
-                            </div>
-                          )}
-                        </td>
-                        <td className="py-8 px-10 text-right">
-                          {!s.is_current && (
-                            <button 
-                              onClick={() => logoutOther(s.id)}
-                              className="px-6 py-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[10px] font-black uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-all active:scale-95 shadow-lg"
-                            >
-                              Terminate
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="mt-12 p-8 rounded-[2rem] bg-amber-500/5 border border-amber-500/10 flex items-start gap-6">
-                 <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500 shrink-0">
-                    <Icon.Bot />
+              <div className="grid lg:grid-cols-2 gap-16">
+                 <div className="space-y-12">
+                    <SessionsList onLogoutRequested={requestLogout} />
                  </div>
-                 <div className="space-y-2">
-                    <h4 className="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em]">Security Protocol</h4>
-                    <p className="text-[11px] text-white/30 leading-relaxed font-medium uppercase">Terminating other active sessions requires the <strong className="text-white/60">Master Session Killer Password</strong>. This is separate from your standard login credentials to prevent unauthorized account hijacking.</p>
+                 <div className="space-y-12 border-l border-white/5 pl-16">
+                    <SecondaryPasswordForm />
                  </div>
               </div>
             </div>
+
+            <SecondaryPasswordModal 
+              isOpen={sessionModal.isOpen} 
+              onClose={() => setSessionModal({ isOpen: false, targetId: null })}
+              onSuccess={() => {
+                alert('Session successfully terminated');
+                window.location.reload(); // Refresh to update list
+              }}
+              targetId={sessionModal.targetId}
+            />
           </div>
         )}
 
@@ -863,7 +758,7 @@ export default function App() {
                               </div>
                               <button 
                                 onClick={async () => { 
-                                  await axios.delete(`/api/channels/${ch.channel_id}/allowed-users/${encodeURIComponent(u.username)}`); 
+                                  await api.delete(`/api/channels/${ch.channel_id}/allowed-users/${encodeURIComponent(u.username)}`); 
                                   fetchData(); 
                                 }} 
                                 className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center opacity-0 group-hover/badge:opacity-100 hover:bg-rose-500/20 text-rose-500 transition-all duration-500"
@@ -883,7 +778,7 @@ export default function App() {
                           onKeyDown={async (e) => {
                             if (e.key === 'Enter' && e.target.value.trim()) {
                               try {
-                                await axios.post(`/api/channels/${ch.channel_id}/allowed-users`, { input: e.target.value });
+                                await api.post(`/api/channels/${ch.channel_id}/allowed-users`, { input: e.target.value });
                                 e.target.value = '';
                                 fetchData();
                               } catch (err) {

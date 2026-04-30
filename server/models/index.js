@@ -48,13 +48,26 @@ const UsageSchema = new mongoose.Schema({
   youtube_calls: { type: Number, default: 0 }
 });
 
-const SessionSchema = new mongoose.Schema({
-  token: { type: String, unique: true },
-  user: String,
-  ip: String,
-  device: String,
-  last_active: { type: Date, default: Date.now }
+const UserSchema = new mongoose.Schema({
+  email: { type: String, unique: true, required: true },
+  passwordHash: { type: String, required: true },
+  secondaryPasswordHash: { type: String, default: null },
+  created_at: { type: Date, default: Date.now }
 });
+
+const RefreshTokenSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  tokenHash: { type: String, required: true },
+  deviceInfo: String,
+  ipAddress: String,
+  createdAt: { type: Date, default: Date.now },
+  lastUsedAt: { type: Date, default: Date.now },
+  expiresAt: { type: Date, required: true },
+  isActive: { type: Boolean, default: true }
+});
+
+// TTL Index to auto-delete expired tokens
+RefreshTokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 module.exports = {
   Clip: mongoose.model('Clip', ClipSchema),
@@ -63,5 +76,6 @@ module.exports = {
   BlockedIp: mongoose.model('BlockedIp', BlockedIpSchema),
   Settings: mongoose.model('Settings', SettingsSchema),
   Usage: mongoose.model('Usage', UsageSchema),
-  Session: mongoose.model('Session', SessionSchema)
+  User: mongoose.model('User', UserSchema),
+  RefreshToken: mongoose.model('RefreshToken', RefreshTokenSchema)
 };

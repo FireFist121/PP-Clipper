@@ -11,16 +11,33 @@ const logger = require('../bot/utils/logger');
 const { initDatabase } = require('../shared/db');
 const { ensureDirectories } = require('../shared/storage');
 
+const cookieParser = require('cookie-parser');
+const bcrypt = require('bcrypt');
+const { User } = require('./models');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Initialize Database and Storage
-initDatabase().catch(err => logger.error(`Database Init Error: ${err.message}`));
+initDatabase().then(async () => {
+  // Seed Initial Admin User if none exists
+  const userCount = await User.countDocuments();
+  if (userCount === 0) {
+    const passwordHash = await bcrypt.hash('FIREFISTDEAD', 12);
+    await User.create({
+      email: 'PPClipper@admin.com',
+      passwordHash: passwordHash
+    });
+    logger.info('✅ Initial admin user seeded: PPClipper@admin.com');
+  }
+}).catch(err => logger.error(`Database Init Error: ${err.message}`));
+
 ensureDirectories();
 
 // Middleware
-app.use(cors());
+app.use(cors({ origin: true, credentials: true })); // Allow credentials for cookies
 app.use(express.json());
+app.use(cookieParser());
 
 // Routes
 app.use('/api/nightbot', require('./routes/nightbot'));
