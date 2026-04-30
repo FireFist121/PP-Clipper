@@ -11,8 +11,7 @@
     "dev:client": "npm run dev --prefix client",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "tunnel": "ssh -R 80:127.0.0.1:3000 nokey@localhost.run",
-    "go": "concurrently \"npm run dev:server\" \"npm run dev:client\" \"npm run tunnel\"",
-    "postinstall": "node scripts/setup-binaries.js"
+    "go": "concurrently \"npm run dev:server\" \"npm run dev:client\" \"npm run tunnel\""
   },
   "dependencies": {
     "axios": "^1.6.7",

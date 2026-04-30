@@ -61,11 +61,6 @@ const Icon = {
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
       <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
     </svg>
-  ),
-  Download: () => (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-    </svg>
   )
 };
 
@@ -86,10 +81,7 @@ export default function App() {
   const [chartData, setChartData] = useState([]);
   const [setupModal, setSetupModal] = useState(null);
   const [serverUrl, setServerUrl] = useState('');
-  const [downloadForm, setDownloadForm] = useState({ url: '', start: '00:00:00', end: '00:01:00', quality: '1080', format: 'video' });
-  const [isDownloading, setIsDownloading] = useState(false);
-  const [downloadResult, setDownloadResult] = useState(null);
-  const [manualFiles, setManualFiles] = useState([]);
+  const [isAdding, setIsAdding] = useState(false);
 
   useEffect(() => {
     const host = window.location.origin.replace(':5173', ':3000').replace(':5174', ':3000');
@@ -99,33 +91,12 @@ export default function App() {
   useEffect(() => {
     if (isLoggedIn) {
       fetchData();
-      fetchManualFiles();
       const interval = setInterval(() => {
         fetchData();
-        fetchManualFiles();
       }, 10000);
       return () => clearInterval(interval);
     }
   }, [isLoggedIn]);
-
-  const fetchManualFiles = async () => {
-    try {
-      const res = await axios.get('/api/downloader/files');
-      const filesWithDownloadUrl = res.data.map(f => ({
-        ...f,
-        url: `/api/downloader/view/${f.filename}`
-      }));
-      setManualFiles(filesWithDownloadUrl);
-    } catch (err) { console.error(err); }
-  };
-
-  const deleteManualFile = async (filename) => {
-    if (!window.confirm('Delete this file?')) return;
-    try {
-      await axios.delete(`/api/downloader/files/${filename}`);
-      fetchManualFiles();
-    } catch (err) { console.error(err); }
-  };
 
   const fetchData = async () => {
     try {
@@ -527,7 +498,7 @@ export default function App() {
         <div className="flex items-center gap-3 bg-white/[0.02] p-1.5 rounded-2xl border border-white/5 w-fit">
           <button className={tabCls('dashboard')} onClick={() => setActiveTab('dashboard')}><Icon.Clip /> Dashboard</button>
           <button className={tabCls('channels')} onClick={() => setActiveTab('channels')}><Icon.Channel /> Channels</button>
-          <button className={tabCls('downloader')} onClick={() => setActiveTab('downloader')}><Icon.Download /> Downloader</button>
+          <button className={tabCls('channels')} onClick={() => setActiveTab('channels')}><Icon.Channel /> Channels</button>
         </div>
 
         {activeTab === 'dashboard' && (
@@ -661,220 +632,6 @@ export default function App() {
                     </tbody>
                   </table>
                 </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'downloader' && (
-          <div className="space-y-12 max-w-4xl mx-auto stagger-1">
-            <div className={`${glassCard} p-12 glow-border group/card`}>
-              <div className="space-y-2 mb-10 text-center">
-                <h2 className="text-4xl font-black tracking-tighter uppercase" style={{ fontFamily: "'Syne', sans-serif" }}>MANUAL <span className="hero-gradient">SEGMENT EXTRACTOR</span></h2>
-                <p className="text-[10px] font-black text-cyan-400 tracking-[0.4em] uppercase">Fetch specific parts of any YouTube transmission</p>
-              </div>
-
-              <div className="space-y-8">
-                <div className="space-y-3">
-                  <label className="text-[10px] font-black text-white/20 uppercase tracking-widest ml-4">YouTube Link</label>
-                  <input 
-                    type="text" 
-                    placeholder="https://www.youtube.com/watch?v=..." 
-                    value={downloadForm.url} 
-                    onChange={e => setDownloadForm({ ...downloadForm, url: e.target.value })} 
-                    className={inputCls + " w-full"} 
-                  />
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-8">
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-black text-white/20 uppercase tracking-widest ml-4">Start Timestamp (HH:MM:SS)</label>
-                    <input 
-                      type="text" 
-                      placeholder="00:00:00" 
-                      value={downloadForm.start} 
-                      onChange={e => setDownloadForm({ ...downloadForm, start: e.target.value })} 
-                      className={inputCls + " w-full"} 
-                    />
-                  </div>
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-black text-white/20 uppercase tracking-widest ml-4">End Timestamp (HH:MM:SS)</label>
-                    <input 
-                      type="text" 
-                      placeholder="00:01:00" 
-                      value={downloadForm.end} 
-                      onChange={e => setDownloadForm({ ...downloadForm, end: e.target.value })} 
-                      className={inputCls + " w-full"} 
-                    />
-                  </div>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-8">
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-black text-white/20 uppercase tracking-widest ml-4">Select Quality</label>
-                    <select 
-                      value={downloadForm.quality} 
-                      onChange={e => setDownloadForm({ ...downloadForm, quality: e.target.value })} 
-                      className={inputCls + " w-full appearance-none"}
-                    >
-                      <option value="2160">4K Ultra HD (2160p)</option>
-                      <option value="1440">2K QHD (1440p)</option>
-                      <option value="1080">Full HD (1080p)</option>
-                      <option value="720">HD (720p)</option>
-                      <option value="480">SD (480p)</option>
-                    </select>
-                  </div>
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-black text-white/20 uppercase tracking-widest ml-4">Output Format</label>
-                    <div className="flex gap-4">
-                      <button 
-                        onClick={() => setDownloadForm({ ...downloadForm, format: 'video' })}
-                        className={`flex-1 py-4 rounded-2xl border text-[10px] font-black uppercase tracking-widest transition-all ${downloadForm.format === 'video' ? 'bg-[#7c3aed]/20 border-[#7c3aed] text-white' : 'bg-white/5 border-white/5 text-white/20 hover:bg-white/10'}`}
-                      >
-                        Video + Audio
-                      </button>
-                      <button 
-                        onClick={() => setDownloadForm({ ...downloadForm, format: 'audio' })}
-                        className={`flex-1 py-4 rounded-2xl border text-[10px] font-black uppercase tracking-widest transition-all ${downloadForm.format === 'audio' ? 'bg-[#7c3aed]/20 border-[#7c3aed] text-white' : 'bg-white/5 border-white/5 text-white/20 hover:bg-white/10'}`}
-                      >
-                        Audio Only (MP3)
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <button 
-                  onClick={async () => {
-                    if (!downloadForm.url || !downloadForm.start || !downloadForm.end) {
-                      alert('Please fill all fields');
-                      return;
-                    }
-                    setIsDownloading(true);
-                    setDownloadResult(null);
-                    try {
-                      const res = await axios.post('/api/downloader/download', downloadForm);
-                      setDownloadResult({
-                        ...res.data,
-                        url: `/api/downloader/view/${res.data.filename}`
-                      });
-                      fetchManualFiles(); // Refresh the list
-                    } catch (err) {
-                      alert(err.response?.data?.error || 'Download failed');
-                    } finally {
-                      setIsDownloading(false);
-                    }
-                  }}
-                  disabled={isDownloading}
-                  className={accentBtn + " w-full h-[70px] mt-8"}
-                >
-                  {isDownloading ? (
-                    <>
-                      <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full processing" />
-                      PROCESSING TRANSMISSION...
-                    </>
-                  ) : (
-                    <>
-                      <Icon.Download /> INITIATE DOWNLOAD
-                    </>
-                  )}
-                </button>
-
-                {downloadResult && (
-                  <div className="mt-10 p-8 rounded-[2rem] bg-emerald-500/10 border border-emerald-500/20 animate-fade-in">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <div className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.2em] mb-1">Extraction Complete</div>
-                        <div className="text-sm font-bold text-white truncate max-w-md">{downloadResult.filename}</div>
-                      </div>
-                      <a 
-                        href={downloadResult.url} 
-                        download 
-                        className="px-6 py-3 rounded-xl bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_10px_20px_rgba(16,185,129,0.3)]"
-                      >
-                        Save File
-                      </a>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            <div className="grid md:grid-cols-2 gap-8">
-               <div className={premiumBadge}>
-                  <div className="w-12 h-12 rounded-2xl bg-cyan-400/10 border border-cyan-400/20 flex items-center justify-center text-cyan-400">
-                    <Icon.Bot />
-                  </div>
-                  <div>
-                    <div className="text-[9px] font-black text-cyan-400 uppercase tracking-widest">Fast Seeking</div>
-                    <p className="text-[11px] text-white/40 leading-relaxed uppercase font-bold mt-0.5">We use frame-accurate seeking to extract segments without full downloads.</p>
-                  </div>
-               </div>
-               <div className={premiumBadge}>
-                  <div className="w-12 h-12 rounded-2xl bg-violet-400/10 border border-violet-400/20 flex items-center justify-center text-violet-400">
-                    <Icon.Clip />
-                  </div>
-                  <div>
-                    <div className="text-[9px] font-black text-violet-400 uppercase tracking-widest">Stream Ready</div>
-                    <p className="text-[11px] text-white/40 leading-relaxed uppercase font-bold mt-0.5">Works on active live streams, VODs, and Shorts automatically.</p>
-                  </div>
-               </div>
-            </div>
-
-            {/* Manual Downloads List (Download Folder) */}
-            <div className={`${glassCard} glow-border group/card mt-12`}>
-              <div className="p-10 border-b border-white/5 flex justify-between items-center bg-white/[0.01]">
-                <div className="space-y-1">
-                  <h2 className="text-xl font-black tracking-tight uppercase" style={{ fontFamily: "'Syne', sans-serif" }}>DOWNLOAD FOLDER</h2>
-                  <p className="text-[9px] font-black text-cyan-400 tracking-[0.3em] uppercase">Manual Segment Archives</p>
-                </div>
-                <button onClick={fetchManualFiles} className="text-[10px] font-black text-white/20 hover:text-white transition-colors uppercase tracking-widest">Refresh</button>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                  <thead className="bg-white/5">
-                    <tr>
-                      <th className="py-4 px-8 text-[10px] font-bold uppercase tracking-widest text-[#8a9bb0]">File Details</th>
-                      <th className="py-4 px-8 text-[10px] font-bold uppercase tracking-widest text-[#8a9bb0]">Size</th>
-                      <th className="py-4 px-8 text-[10px] font-bold uppercase tracking-widest text-[#8a9bb0]">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y border-white/5">
-                    {manualFiles.length === 0 ? (
-                      <tr><td colSpan="3" className="py-16 text-center text-xs font-bold italic text-white/10 uppercase tracking-widest">No manual downloads yet.</td></tr>
-                    ) : (
-                      manualFiles.map((f, i) => (
-                        <tr key={i} className="group hover:bg-white/[0.02] transition-colors">
-                          <td className="py-6 px-8">
-                            <div className="text-sm font-bold text-white/80">{f.filename}</div>
-                            <div className="text-[10px] text-white/20 uppercase tracking-widest mt-1">{new Date(f.created_at).toLocaleString()}</div>
-                          </td>
-                          <td className="py-6 px-8">
-                            <span className="text-[10px] font-black text-cyan-400/60 bg-cyan-400/5 px-3 py-1.5 rounded-lg border border-cyan-400/10">
-                              {(f.size / (1024 * 1024)).toFixed(2)} MB
-                            </span>
-                          </td>
-                          <td className="py-6 px-8 flex gap-3">
-                            <a 
-                              href={f.url} 
-                              download 
-                              className="p-3 bg-white/5 rounded-xl hover:bg-emerald-500/20 text-emerald-500/40 hover:text-emerald-500 transition-all"
-                              title="Download"
-                            >
-                              <Icon.Download />
-                            </a>
-                            <button 
-                              onClick={() => deleteManualFile(f.filename)} 
-                              className="p-3 bg-white/5 rounded-xl hover:bg-rose-500/20 text-rose-500/40 hover:text-rose-500 transition-all"
-                              title="Delete"
-                            >
-                              <Icon.Trash />
-                            </button>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
               </div>
             </div>
           </div>
