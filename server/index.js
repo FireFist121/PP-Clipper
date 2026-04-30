@@ -19,20 +19,31 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Initialize Database and Storage
-initDatabase().then(async () => {
-  // Seed Initial Admin User if none exists
-  const userCount = await User.countDocuments();
-  if (userCount === 0) {
-    const passwordHash = await bcrypt.hash('FIREFISTDEAD', 12);
-    await User.create({
-      email: 'PPClipper@admin.com',
-      passwordHash: passwordHash
-    });
-    logger.info('✅ Initial admin user seeded: PPClipper@admin.com');
+async function startApp() {
+  try {
+    console.log('🔄 Initializing Database...');
+    await initDatabase();
+    
+    // Seed Initial Admin User if none exists
+    const userCount = await User.countDocuments();
+    if (userCount === 0) {
+      const passwordHash = await bcrypt.hash('FIREFISTDEAD', 12);
+      await User.create({
+        email: 'PPClipper@admin.com',
+        passwordHash: passwordHash
+      });
+      logger.info('✅ Initial admin user seeded: PPClipper@admin.com');
+    } else {
+      logger.info(`ℹ️ Database already has ${userCount} users.`);
+    }
+    
+    ensureDirectories();
+  } catch (err) {
+    logger.error(`❌ App Initialization Error: ${err.message}`);
   }
-}).catch(err => logger.error(`Database Init Error: ${err.message}`));
+}
 
-ensureDirectories();
+startApp();
 
 // Middleware
 app.use(cors({ origin: true, credentials: true })); // Allow credentials for cookies

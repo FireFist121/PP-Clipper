@@ -11,6 +11,8 @@ const initDatabase = async () => {
     process.exit(1);
   }
 
+  console.log(`📡 Attempting connection to: ${mongoUri.substring(0, 15)}...`);
+
   try {
     await mongoose.connect(mongoUri);
     console.log('✅ Connected to MongoDB');
