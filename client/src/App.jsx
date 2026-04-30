@@ -81,7 +81,6 @@ export default function App() {
   const [chartData, setChartData] = useState([]);
   const [setupModal, setSetupModal] = useState(null);
   const [serverUrl, setServerUrl] = useState('');
-  const [isAdding, setIsAdding] = useState(false);
 
   useEffect(() => {
     const host = window.location.origin.replace(':5173', ':3000').replace(':5174', ':3000');
