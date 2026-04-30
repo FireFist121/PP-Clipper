@@ -7,7 +7,7 @@ const { execSync } = require('child_process');
 const BIN_DIR = path.join(__dirname, '..', 'bin');
 const YT_DLP_URL = 'https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp';
 // Using a reliable static build of ffmpeg for Linux x64
-const FFMPEG_URL = 'https://github.com/eugeneware/ffmpeg-static/releases/download/b6.0/linux-x64';
+const FFMPEG_URL = 'https://github.com/eugeneware/ffmpeg-static/releases/download/b6.1.1/ffmpeg-linux-x64';
 
 async function downloadFile(url, dest) {
     return new Promise((resolve, reject) => {
