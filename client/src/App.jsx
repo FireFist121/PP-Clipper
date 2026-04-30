@@ -6,6 +6,13 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
 
+// Axios Interceptor for Authorization
+axios.interceptors.request.use((config) => {
+  const token = localStorage.getItem('pp_clipper_token');
+  if (token) config.headers['Authorization'] = token;
+  return config;
+});
+
 // ─── Icons ───────────────────────────────────────────────────────────────────
 const Icon = {
   Search: () => (
@@ -61,11 +68,18 @@ const Icon = {
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
       <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
     </svg>
+  ),
+  Settings: () => (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+    </svg>
   )
 };
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
+  const [sessions, setSessions] = useState([]);
   const [stats, setStats] = useState(null);
   const [clips, setClips] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -88,14 +102,40 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    const checkAuth = async () => {
+      const token = localStorage.getItem('pp_clipper_token');
+      if (token) {
+        try {
+          const res = await axios.get('/api/auth/me');
+          setUser(res.data);
+          setIsLoggedIn(true);
+        } catch (err) {
+          localStorage.removeItem('pp_clipper_token');
+        }
+      }
+      setLoading(false);
+    };
+    checkAuth();
+  }, []);
+
+  useEffect(() => {
     if (isLoggedIn) {
       fetchData();
+      fetchSessions();
       const interval = setInterval(() => {
         fetchData();
+        fetchSessions();
       }, 10000);
       return () => clearInterval(interval);
     }
   }, [isLoggedIn]);
+
+  const fetchSessions = async () => {
+    try {
+      const res = await axios.get('/api/auth/sessions');
+      setSessions(res.data);
+    } catch (err) { console.error(err); }
+  };
 
   const fetchData = async () => {
     try {
@@ -235,20 +275,36 @@ export default function App() {
     }
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     const email = e.target.email.value;
     const password = e.target.password.value;
-    if (email === 'PPClipper@admin.com' && password === 'FIREFISTDEAD') {
-      localStorage.setItem('pp_clipper_auth', 'true');
+    try {
+      const res = await axios.post('/api/auth/login', { email, password });
+      localStorage.setItem('pp_clipper_token', res.data.token);
+      setUser(res.data);
       setIsLoggedIn(true);
-    } else { alert('Invalid credentials!'); }
+    } catch (err) {
+      alert(err.response?.data?.error || 'Login failed');
+    }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('pp_clipper_auth');
+  const handleLogout = async () => {
+    try { await axios.post('/api/auth/logout'); } catch(e){}
+    localStorage.removeItem('pp_clipper_token');
     setIsLoggedIn(false);
     window.location.reload();
+  };
+
+  const logoutOther = async (sessionId) => {
+    const masterPassword = window.prompt('Enter Session Master Password to logout this device:');
+    if (!masterPassword) return;
+    try {
+      await axios.post('/api/auth/sessions/logout-other', { sessionId, masterPassword });
+      fetchSessions();
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to logout session');
+    }
   };
 
   // ── Styles ─────────────────────────────────────────────────────────────────
@@ -497,6 +553,7 @@ export default function App() {
         <div className="flex items-center gap-3 bg-white/[0.02] p-1.5 rounded-2xl border border-white/5 w-fit">
           <button className={tabCls('dashboard')} onClick={() => setActiveTab('dashboard')}><Icon.Clip /> Dashboard</button>
           <button className={tabCls('channels')} onClick={() => setActiveTab('channels')}><Icon.Channel /> Channels</button>
+          <button className={tabCls('settings')} onClick={() => setActiveTab('settings')}><Icon.Settings /> Settings</button>
         </div>
 
         {activeTab === 'dashboard' && (
@@ -630,6 +687,82 @@ export default function App() {
                     </tbody>
                   </table>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'settings' && (
+          <div className="space-y-12 max-w-5xl mx-auto stagger-1">
+            <div className={`${glassCard} p-12 glow-border group/card`}>
+              <div className="flex justify-between items-center mb-10">
+                <div className="space-y-2">
+                  <h2 className="text-2xl font-black tracking-tight uppercase" style={{ fontFamily: "'Syne', sans-serif" }}>SESSION MANAGEMENT</h2>
+                  <p className="text-[10px] font-black text-cyan-400 tracking-[0.4em] uppercase">Control Active Terminal Logins</p>
+                </div>
+                <div className="text-right">
+                   <div className="text-[8px] font-black text-white/20 uppercase tracking-[0.2em] mb-1">Authenticated As</div>
+                   <div className="text-xs font-black text-[#7c3aed] uppercase tracking-widest">{user?.user}</div>
+                </div>
+              </div>
+
+              <div className="overflow-hidden rounded-[2rem] border border-white/5 bg-white/[0.01]">
+                <table className="w-full text-left">
+                  <thead className="bg-white/5">
+                    <tr>
+                      <th className="py-5 px-10 text-[10px] font-black uppercase tracking-widest text-white/40">Device / IP</th>
+                      <th className="py-5 px-10 text-[10px] font-black uppercase tracking-widest text-white/40">Status</th>
+                      <th className="py-5 px-10 text-[10px] font-black uppercase tracking-widest text-white/40 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y border-white/5">
+                    {sessions.map((s) => (
+                      <tr key={s.id} className={`hover:bg-white/[0.02] transition-colors ${s.is_current ? 'bg-[#7c3aed]/5' : ''}`}>
+                        <td className="py-8 px-10">
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-[#7c3aed]">
+                              <Icon.Bot />
+                            </div>
+                            <div>
+                              <div className="text-sm font-black text-white">{s.device}</div>
+                              <div className="text-[10px] font-black text-white/20 uppercase tracking-widest mt-0.5">{s.ip}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-8 px-10">
+                          {s.is_current ? (
+                            <span className="px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[8px] font-black uppercase tracking-widest">Current Terminal</span>
+                          ) : (
+                            <div className="space-y-1">
+                               <span className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white/40 text-[8px] font-black uppercase tracking-widest">Active Session</span>
+                               <div className="text-[7px] text-white/10 font-black uppercase tracking-widest ml-1">Last active {new Date(s.last_active).toLocaleTimeString()}</div>
+                            </div>
+                          )}
+                        </td>
+                        <td className="py-8 px-10 text-right">
+                          {!s.is_current && (
+                            <button 
+                              onClick={() => logoutOther(s.id)}
+                              className="px-6 py-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[10px] font-black uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-all active:scale-95 shadow-lg"
+                            >
+                              Terminate
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="mt-12 p-8 rounded-[2rem] bg-amber-500/5 border border-amber-500/10 flex items-start gap-6">
+                 <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500 shrink-0">
+                    <Icon.Bot />
+                 </div>
+                 <div className="space-y-2">
+                    <h4 className="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em]">Security Protocol</h4>
+                    <p className="text-[11px] text-white/30 leading-relaxed font-medium uppercase">Terminating other active sessions requires the <strong className="text-white/60">Master Session Killer Password</strong>. This is separate from your standard login credentials to prevent unauthorized account hijacking.</p>
+                 </div>
               </div>
             </div>
           </div>

@@ -27,6 +27,7 @@ app.use('/api/nightbot', require('./routes/nightbot'));
 app.use('/api/clips', require('./routes/clips'));
 app.use('/api/stats', require('./routes/stats'));
 app.use('/api/channels', require('./routes/channels'));
+app.use('/api/auth', require('./routes/auth'));
 
 // Serve downloaded clips statically (so dashboard can play them)
 app.use('/clips', express.static(path.join(process.cwd(), 'clips', 'downloads')));

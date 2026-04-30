@@ -48,11 +48,20 @@ const UsageSchema = new mongoose.Schema({
   youtube_calls: { type: Number, default: 0 }
 });
 
+const SessionSchema = new mongoose.Schema({
+  token: { type: String, unique: true },
+  user: String,
+  ip: String,
+  device: String,
+  last_active: { type: Date, default: Date.now }
+});
+
 module.exports = {
   Clip: mongoose.model('Clip', ClipSchema),
   Channel: mongoose.model('Channel', ChannelSchema),
   SuspiciousLog: mongoose.model('SuspiciousLog', SuspiciousLogSchema),
   BlockedIp: mongoose.model('BlockedIp', BlockedIpSchema),
   Settings: mongoose.model('Settings', SettingsSchema),
-  Usage: mongoose.model('Usage', UsageSchema)
+  Usage: mongoose.model('Usage', UsageSchema),
+  Session: mongoose.model('Session', SessionSchema)
 };
