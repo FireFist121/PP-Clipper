@@ -14,7 +14,9 @@ const initDatabase = async () => {
   console.log(`📡 Attempting connection to: ${mongoUri.substring(0, 15)}...`);
 
   try {
-    await mongoose.connect(mongoUri);
+    await mongoose.connect(mongoUri, {
+      serverSelectionTimeoutMS: 5000, // Fail fast after 5 seconds if IP not whitelisted
+    });
     console.log('✅ Connected to MongoDB');
     
     // Initialize Nightbot Token if missing
