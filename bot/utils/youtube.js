@@ -114,6 +114,8 @@ class YouTubeClient {
         const streamInfo = {
           id: videoId,
           title: videoInfo.snippet.title,
+          channelId: videoInfo.snippet.channelId,
+          channelTitle: videoInfo.snippet.channelTitle,
           url: `https://www.youtube.com/watch?v=${videoId}`,
           actualStartTime: videoInfo.liveStreamingDetails?.actualStartTime 
         };

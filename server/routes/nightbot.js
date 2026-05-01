@@ -144,10 +144,9 @@ async function processLiveClipBackground(channel, customTitle, username) {
     await db.clips.insert({
       video_id: stream.id,
       title: customTitle || stream.title,
-      youtube_url: timestampedUrl,
       clipped_by: username || 'Unknown',
-      channel_id: channelId,
-      channel_title: channel.title,
+      channel_id: stream.channelId || channelId,
+      channel_title: stream.channelTitle || channel.title,
       duration: 0,
       duration_raw: tsDisplay
     });
@@ -170,8 +169,8 @@ async function processVideoBackground(url, customTitle, username, channel) {
         title: customTitle || video.title,
         youtube_url: video.url,
         clipped_by: username || 'Unknown',
-        channel_id: channel.channel_id,
-        channel_title: channel.title,
+        channel_id: video.channelId || channel.channel_id,
+        channel_title: video.channelTitle || channel.title,
         duration: video.duration || 0,
         duration_raw: video.duration_raw || '0:00'
       });
