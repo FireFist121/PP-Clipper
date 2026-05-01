@@ -49,6 +49,7 @@ router.post('/login', async (req, res) => {
       userId: user._id,
       tokenHash: hashToken(refreshToken),
       deviceInfo,
+      userAgent: req.headers['user-agent'],
       ipAddress,
       expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
     });
@@ -101,6 +102,7 @@ router.get('/refresh', async (req, res) => {
     storedToken.tokenHash = hashToken(newRefreshToken);
     storedToken.lastUsedAt = new Date();
     storedToken.deviceInfo = deviceInfo;
+    storedToken.userAgent = req.headers['user-agent'];
     storedToken.ipAddress = ipAddress;
     await storedToken.save();
 
@@ -150,6 +152,7 @@ router.get('/sessions', authenticateToken, async (req, res) => {
     res.json(sessions.map(s => ({
       id: s._id,
       deviceInfo: s.deviceInfo,
+      userAgent: s.userAgent || s.deviceInfo, // Fallback for old sessions
       ipAddress: s.ipAddress,
       createdAt: s.createdAt,
       lastUsedAt: s.lastUsedAt,

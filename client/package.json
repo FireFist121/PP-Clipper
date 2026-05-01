@@ -10,17 +10,18 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@vitejs/plugin-react": "^6.0.1",
+    "autoprefixer": "^10.4.16",
     "axios": "^1.15.2",
     "date-fns": "^4.1.0",
     "lucide-react": "^1.11.0",
+    "postcss": "^8.4.31",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "react-router-dom": "^7.14.2",
     "recharts": "^3.8.1",
-    "@vitejs/plugin-react": "^6.0.1",
-    "autoprefixer": "^10.4.16",
-    "postcss": "^8.4.31",
     "tailwindcss": "^3.4.1",
+    "ua-parser-js": "^2.0.9",
     "vite": "^8.0.10"
   },
   "devDependencies": {

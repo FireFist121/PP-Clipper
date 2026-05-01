@@ -59,6 +59,7 @@ const RefreshTokenSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   tokenHash: { type: String, required: true },
   deviceInfo: String,
+  userAgent: String,
   ipAddress: String,
   createdAt: { type: Date, default: Date.now },
   lastUsedAt: { type: Date, default: Date.now },
