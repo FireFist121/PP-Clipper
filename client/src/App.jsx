@@ -550,6 +550,30 @@ export default function App() {
 
         .processing { animation: rotate 1s linear infinite; }
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* Dark Theme Form Overrides */
+        select, option, input[type="date"] {
+          background-color: #0d0f12 !important;
+          color: #ffffff !important;
+        }
+        
+        select {
+          appearance: none;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+          background-repeat: no-repeat;
+          background-position: right 1.5rem center;
+          background-size: 0.8rem;
+          padding-right: 3.5rem !important;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+          filter: invert(1);
+          cursor: pointer;
+        }
+
+        [color-scheme="dark"] {
+          color-scheme: dark;
+        }
       `}</style>
 
       {/* Floating Particles */}
@@ -672,7 +696,7 @@ export default function App() {
                     <select 
                       value={filters.channel}
                       onChange={e => updateFilter('channel', e.target.value)}
-                      className="w-full bg-white/[0.03] border border-white/10 text-white rounded-2xl px-6 py-4 text-xs focus:border-[#7c3aed] outline-none appearance-none cursor-pointer hover:bg-white/5 transition-all"
+                      className="w-full bg-[#0d0f12] border border-white/10 text-white rounded-2xl px-6 py-4 text-xs focus:border-[#7c3aed] outline-none appearance-none cursor-pointer hover:bg-white/5 transition-all"
                     >
                       <option value="all">All Channels</option>
                       {filterData.channels.map(c => <option key={c} value={c}>{c}</option>)}
@@ -685,7 +709,7 @@ export default function App() {
                     <select 
                       value={filters.streamer}
                       onChange={e => updateFilter('streamer', e.target.value)}
-                      className="w-full bg-white/[0.03] border border-white/10 text-white rounded-2xl px-6 py-4 text-xs focus:border-[#7c3aed] outline-none appearance-none cursor-pointer hover:bg-white/5 transition-all"
+                      className="w-full bg-[#0d0f12] border border-white/10 text-white rounded-2xl px-6 py-4 text-xs focus:border-[#7c3aed] outline-none appearance-none cursor-pointer hover:bg-white/5 transition-all"
                     >
                       <option value="all">All Users</option>
                       {filterData.streamers.map(s => <option key={s} value={s}>{s}</option>)}
@@ -701,7 +725,7 @@ export default function App() {
                           type="date" 
                           value={filters.from}
                           onChange={e => updateFilter('from', e.target.value)}
-                          className="w-full bg-white/[0.03] border border-white/10 text-white rounded-2xl px-5 py-4 text-[10px] focus:border-[#7c3aed] outline-none [color-scheme:dark]"
+                          className="w-full bg-[#0d0f12] border border-white/10 text-white rounded-2xl px-5 py-4 text-[10px] focus:border-[#7c3aed] outline-none [color-scheme:dark]"
                         />
                       </div>
                       <div className="relative flex-1">
@@ -709,7 +733,7 @@ export default function App() {
                           type="date" 
                           value={filters.to}
                           onChange={e => updateFilter('to', e.target.value)}
-                          className="w-full bg-white/[0.03] border border-white/10 text-white rounded-2xl px-5 py-4 text-[10px] focus:border-[#7c3aed] outline-none [color-scheme:dark]"
+                          className="w-full bg-[#0d0f12] border border-white/10 text-white rounded-2xl px-5 py-4 text-[10px] focus:border-[#7c3aed] outline-none [color-scheme:dark]"
                         />
                       </div>
                     </div>
@@ -721,7 +745,7 @@ export default function App() {
                     <select 
                       value={filters.duration}
                       onChange={e => updateFilter('duration', e.target.value)}
-                      className="w-full bg-white/[0.03] border border-white/10 text-white rounded-2xl px-6 py-4 text-xs focus:border-[#7c3aed] outline-none appearance-none cursor-pointer hover:bg-white/5 transition-all"
+                      className="w-full bg-[#0d0f12] border border-white/10 text-white rounded-2xl px-6 py-4 text-xs focus:border-[#7c3aed] outline-none appearance-none cursor-pointer hover:bg-white/5 transition-all"
                     >
                       <option value="any">Any Duration</option>
                       <option value="short">Short (&lt; 4 min)</option>
@@ -736,7 +760,7 @@ export default function App() {
                     <select 
                       value={filters.sort}
                       onChange={e => updateFilter('sort', e.target.value)}
-                      className="w-full bg-white/[0.03] border border-white/10 text-white rounded-2xl px-6 py-4 text-xs focus:border-[#7c3aed] outline-none appearance-none cursor-pointer hover:bg-white/5 transition-all"
+                      className="w-full bg-[#0d0f12] border border-white/10 text-white rounded-2xl px-6 py-4 text-xs focus:border-[#7c3aed] outline-none appearance-none cursor-pointer hover:bg-white/5 transition-all"
                     >
                       <option value="newest">Newest Downloaded</option>
                       <option value="oldest">Oldest Downloaded</option>
@@ -916,7 +940,7 @@ export default function App() {
                     <select 
                       value={filters.limit}
                       onChange={e => updateFilter('limit', parseInt(e.target.value))}
-                      className="bg-white/5 border border-white/10 text-white text-[10px] font-black rounded-lg px-3 py-1.5 outline-none focus:border-[#7c3aed]"
+                      className="bg-[#0d0f12] border border-white/10 text-white text-[10px] font-black rounded-lg px-3 py-1.5 outline-none focus:border-[#7c3aed] appearance-none"
                     >
                       {[10, 20, 50, 100].map(v => <option key={v} value={v}>{v}</option>)}
                     </select>
