@@ -13,7 +13,9 @@ const { ensureDirectories } = require('../shared/storage');
 
 const cookieParser = require('cookie-parser');
 const bcrypt = require('bcrypt');
-const { User } = require('./models');
+const { User, Clip } = require('./models');
+const cron = require('node-cron');
+const storage = require('../shared/storage');
 
 const app = express();
 app.set('trust proxy', 1);
@@ -79,6 +81,35 @@ app.get('*', (req, res, next) => {
 app.use((err, req, res, next) => {
   logger.error(`API Error: ${err.message}`);
   res.status(500).json({ error: err.message || 'Internal Server Error' });
+});
+
+});
+
+// Auto-delete clips older than 2 days
+cron.schedule('0 * * * *', async () => {
+  try {
+    const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
+    const oldClips = await Clip.find({ created_at: { $lt: twoDaysAgo } });
+    
+    if (oldClips.length > 0) {
+      logger.info(`[Auto-Delete] Found ${oldClips.length} clips older than 2 days. Starting cleanup...`);
+      
+      for (const clip of oldClips) {
+        // Delete video file
+        const videoPath = storage.getClipPath(clip.channel_title || 'unknown', clip.video_id);
+        storage.deleteFile(videoPath);
+        
+        // Delete thumbnail file
+        const thumbPath = storage.getThumbnailPath(clip.video_id);
+        storage.deleteFile(thumbPath);
+      }
+      
+      const result = await Clip.deleteMany({ created_at: { $lt: twoDaysAgo } });
+      logger.info(`[Auto-Delete] Successfully removed ${result.deletedCount} clips from database.`);
+    }
+  } catch (err) {
+    logger.error(`[Auto-Delete] Error: ${err.message}`);
+  }
 });
 
 app.listen(PORT, () => {

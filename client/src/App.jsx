@@ -95,6 +95,11 @@ const Icon = {
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
     </svg>
+  ),
+  Clock: () => (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+    </svg>
   )
 };
 
@@ -1034,6 +1039,10 @@ export default function App() {
               <div className="mb-12">
                 <h2 className="text-3xl font-black tracking-tight uppercase mb-2" style={{ fontFamily: "'Syne', sans-serif" }}>SECURITY TERMINAL</h2>
                 <p className="text-[10px] font-black text-cyan-400 tracking-[0.4em] uppercase">Control Access & Authorization</p>
+                <div className="flex items-center gap-2 mt-4 text-[10px] font-black text-white/40 uppercase tracking-widest bg-white/5 w-fit px-4 py-2 rounded-lg">
+                  <Icon.Clock />
+                  Clips auto-delete after 2 days
+                </div>
               </div>
 
               <div className="grid lg:grid-cols-2 gap-16">
