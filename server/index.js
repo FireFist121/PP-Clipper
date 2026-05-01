@@ -83,8 +83,6 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: err.message || 'Internal Server Error' });
 });
 
-});
-
 // Auto-delete clips older than 2 days
 cron.schedule('0 * * * *', async () => {
   try {
