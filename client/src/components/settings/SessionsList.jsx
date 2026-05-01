@@ -65,48 +65,49 @@ const SessionsList = ({ onLogoutRequested }) => {
     }
   }, [sessions]);
 
-  const getDeviceLabel = (userAgent) => {
-    const ua = userAgent || '';
-    const parser = new UAParser(ua);
-    const result = parser.getResult();
+  const getDeviceLabel = (deviceInfo) => {
+    if (!deviceInfo) return { displayString: 'Unknown Device', icon: '❓' };
     
-    const browser = result.browser.name || 'Browser';
-    const browserVersion = result.browser.major || '';
-
-    // Check raw UA string for Android (ua-parser-js misses this sometimes)
-    if (/Android/i.test(ua)) {
-      const androidMatch = ua.match(/Android\s([\d.]+)/i);
-      const androidVersion = androidMatch ? androidMatch[1] : '';
+    // Must check Android BEFORE ua-parser to avoid Linux misdetection
+    if (deviceInfo.includes('Android')) {
+      const match = deviceInfo.match(/Android\s*([\d.]+)?/i);
+      const version = match?.[1] ? ` ${match[1]}` : '';
+      const chrome = deviceInfo.match(/Chrome\/([\d]+)/);
+      const chromeV = chrome?.[1] ? ` Chrome ${chrome[1]}` : '';
       return { 
-        displayString: `${browser} ${browserVersion} on Android ${androidVersion}`.trim(), 
+        displayString: `${chromeV.trim()} on Android${version}`.replace(/\s+/g, ' ').trim(), 
         icon: '📱' 
       };
     }
 
-    if (/iPhone|iPad/i.test(ua)) {
+    if (deviceInfo.includes('iPhone') || deviceInfo.includes('iPad')) {
       return { 
-        displayString: `${browser} ${browserVersion} on iOS`.trim(), 
+        displayString: `Safari on iOS`, 
         icon: '📱' 
       };
     }
 
-    const os = result.os.name || 'Unknown OS';
-    const osVersion = result.os.version || '';
+    // Fallback to ua-parser for desktop
+    const parser = new UAParser(deviceInfo);
+    const r = parser.getResult();
+    const browser = `${r.browser.name || ''} ${r.browser.major || ''}`.trim();
+    const os = `${r.os.name || ''} ${r.os.version || ''}`.trim();
     return { 
-      displayString: `${browser} ${browserVersion} on ${os} ${osVersion}`.trim(), 
+      displayString: `${browser || 'Browser'} on ${os || 'Unknown OS'}`.trim(), 
       icon: '🖥️' 
     };
   };
 
   const getEnhancedDeviceInfo = (session) => {
+    console.log('Raw deviceInfo:', session.userAgent || session.deviceInfo);
+    
     // If we have the raw userAgent, parse it thoroughly
     if (session.userAgent) {
       return getDeviceLabel(session.userAgent);
     }
 
     // Fallback for old sessions that only have the deviceInfo string
-    const icon = session.deviceInfo.toLowerCase().includes('mobile') || session.deviceInfo.toLowerCase().includes('android') ? '📱' : '🖥️';
-    return { displayString: session.deviceInfo, icon };
+    return getDeviceLabel(session.deviceInfo);
   };
 
   if (loading) return <div className="text-white/20 text-[10px] font-black uppercase tracking-[0.3em] py-10">Loading active terminals...</div>;
