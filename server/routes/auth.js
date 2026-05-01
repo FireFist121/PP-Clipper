@@ -43,6 +43,7 @@ router.post('/login', async (req, res) => {
 
     // Capture real IP
     const ipAddress = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '::1').split(',')[0].trim();
+    console.log('Captured IP:', req.ip, req.headers['x-forwarded-for']);
 
     // Store refresh token
     await RefreshToken.create({

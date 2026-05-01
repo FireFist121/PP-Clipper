@@ -33,23 +33,24 @@ const SessionsList = ({ onLogoutRequested }) => {
       let changed = false;
 
       for (const s of sessions) {
-        if (!newLocations[s.ipAddress]) {
-          if (s.ipAddress === '::1' || s.ipAddress === '127.0.0.1' || s.ipAddress.includes('localhost')) {
-            newLocations[s.ipAddress] = 'Local Network';
+        const ip = s.ipAddress;
+        if (!newLocations[ip]) {
+          if (!ip || ip === '::1' || ip === '127.0.0.1' || ip.includes('localhost') || ip === 'Unknown') {
+            newLocations[ip] = 'Local Network';
             changed = true;
           } else {
             try {
-              const res = await axios.get(`http://ip-api.com/json/${s.ipAddress}`);
+              const res = await axios.get(`http://ip-api.com/json/${ip}`);
               if (res.data && res.data.status === 'success') {
-                newLocations[s.ipAddress] = `${res.data.city}, ${res.data.country}`;
+                newLocations[ip] = `${res.data.city}, ${res.data.country}`;
                 changed = true;
               } else {
-                newLocations[s.ipAddress] = 'Unknown Location';
+                newLocations[ip] = 'Unknown Location';
                 changed = true;
               }
             } catch (err) {
-              console.error('Failed to geolocate:', s.ipAddress, err);
-              newLocations[s.ipAddress] = 'Unknown Location';
+              console.error('Failed to geolocate:', ip, err);
+              newLocations[ip] = 'Unknown Location';
               changed = true;
             }
           }
@@ -64,32 +65,43 @@ const SessionsList = ({ onLogoutRequested }) => {
     }
   }, [sessions]);
 
+  const getDeviceLabel = (userAgent) => {
+    const ua = userAgent || '';
+    const parser = new UAParser(ua);
+    const result = parser.getResult();
+    
+    const browser = result.browser.name || 'Browser';
+    const browserVersion = result.browser.major || '';
+
+    // Check raw UA string for Android (ua-parser-js misses this sometimes)
+    if (/Android/i.test(ua)) {
+      const androidMatch = ua.match(/Android\s([\d.]+)/i);
+      const androidVersion = androidMatch ? androidMatch[1] : '';
+      return { 
+        displayString: `${browser} ${browserVersion} on Android ${androidVersion}`.trim(), 
+        icon: '📱' 
+      };
+    }
+
+    if (/iPhone|iPad/i.test(ua)) {
+      return { 
+        displayString: `${browser} ${browserVersion} on iOS`.trim(), 
+        icon: '📱' 
+      };
+    }
+
+    const os = result.os.name || 'Unknown OS';
+    const osVersion = result.os.version || '';
+    return { 
+      displayString: `${browser} ${browserVersion} on ${os} ${osVersion}`.trim(), 
+      icon: '🖥️' 
+    };
+  };
+
   const getEnhancedDeviceInfo = (session) => {
     // If we have the raw userAgent, parse it thoroughly
     if (session.userAgent) {
-      const parser = new UAParser(session.userAgent);
-      const ua = parser.getResult();
-
-      let browserName = ua.browser.name || 'Unknown Browser';
-      let browserVersion = ua.browser.major || ua.browser.version || '';
-      let osName = ua.os.name || 'Unknown OS';
-      let osVersion = ua.os.version || '';
-      let deviceType = ua.device.type; // 'mobile', 'tablet', undefined
-      let deviceModel = ua.device.model;
-
-      // Override "Linux" with "Android" if it's a mobile device
-      if (deviceType === 'mobile' || deviceType === 'tablet') {
-        if (osName === 'Linux' || !osName || osName === 'Unknown OS') {
-          osName = ua.device.vendor 
-            ? `${ua.device.vendor} ${ua.device.model}` 
-            : 'Android (Mobile)';
-        }
-      }
-
-      const icon = (deviceType === 'mobile' || deviceType === 'tablet') ? '📱' : '🖥️';
-      const displayString = `${browserName} ${browserVersion} on ${osName} ${osVersion}${deviceModel ? ` (${deviceModel})` : ''}`.trim();
-      
-      return { displayString, icon };
+      return getDeviceLabel(session.userAgent);
     }
 
     // Fallback for old sessions that only have the deviceInfo string
