@@ -447,7 +447,7 @@ export default function App() {
                       <img src={`https://img.youtube.com/vi/${clip.video_id}/maxresdefault.jpg`} className="w-full h-full object-cover group-hover/card:scale-110 transition-transform duration-700" alt={clip.title} />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent" />
                       <div className="absolute bottom-6 left-8 right-8">
-                        <div className="text-[10px] font-black text-cyan-400 uppercase tracking-widest mb-1">Clipped by @{clip.clipped_by}</div>
+                        <div className="text-[10px] font-black text-cyan-400 uppercase tracking-widest mb-1">Requested by @{clip.clipped_by?.replace(/^@+/, '')}</div>
                         <div className="text-lg font-black text-white line-clamp-1 tracking-tight">{clip.title}</div>
                       </div>
                       <a href={clip.youtube_url} target="_blank" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-white/10 backdrop-blur-xl rounded-full flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-all duration-500 hover:scale-110 border border-white/20">
@@ -637,7 +637,7 @@ export default function App() {
                   <div className="relative group/search">
                     <input 
                       type="text" 
-                      placeholder="Search title, streamer..." 
+                      placeholder="Search title, channel..." 
                       value={filters.search} 
                       onChange={e => updateFilter('search', e.target.value)} 
                       className={`${inputCls} w-72 !pl-14`} 
@@ -681,13 +681,13 @@ export default function App() {
 
                   {/* Streamer Filter */}
                   <div className="space-y-3">
-                    <label className="text-[10px] font-black text-white/20 uppercase tracking-widest ml-4">Streamer / User</label>
+                    <label className="text-[10px] font-black text-white/20 uppercase tracking-widest ml-4">Requested By</label>
                     <select 
                       value={filters.streamer}
                       onChange={e => updateFilter('streamer', e.target.value)}
                       className="w-full bg-white/[0.03] border border-white/10 text-white rounded-2xl px-6 py-4 text-xs focus:border-[#7c3aed] outline-none appearance-none cursor-pointer hover:bg-white/5 transition-all"
                     >
-                      <option value="all">All Streamers</option>
+                      <option value="all">All Users</option>
                       {filterData.streamers.map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
                   </div>
@@ -825,7 +825,7 @@ export default function App() {
                   <thead className="bg-white/5">
                     <tr>
                       <th className="py-6 px-10 text-[10px] font-black uppercase tracking-widest text-white/30 border-b border-white/5">Clip Information</th>
-                      <th className="py-6 px-10 text-[10px] font-black uppercase tracking-widest text-white/30 border-b border-white/5">Channel / Streamer</th>
+                      <th className="py-6 px-10 text-[10px] font-black uppercase tracking-widest text-white/30 border-b border-white/5">Channel</th>
                       <th className="py-6 px-10 text-[10px] font-black uppercase tracking-widest text-white/30 border-b border-white/5">Metadata</th>
                       <th className="py-6 px-10 text-[10px] font-black uppercase tracking-widest text-white/30 border-b border-white/5 text-right">Actions</th>
                     </tr>
@@ -862,13 +862,13 @@ export default function App() {
                           <td className="py-8 px-10">
                             <div className="space-y-1">
                               <div className="text-xs font-black text-white/80 uppercase tracking-tight">{clip.channel_title || 'Unknown Channel'}</div>
-                              <div className="text-[10px] font-bold text-[#7c3aed] uppercase tracking-widest">Clipped by @{clip.clipped_by}</div>
+                              <div className="text-[10px] font-bold text-[#7c3aed] uppercase tracking-widest">Requested by @{clip.clipped_by?.replace(/^@+/, '')}</div>
                             </div>
                           </td>
                           <td className="py-8 px-10">
                             <div className="flex flex-col gap-2">
                               <span className="text-[9px] font-black px-3 py-1 rounded-full bg-white/5 border border-white/5 w-fit uppercase tracking-wider text-white/40">
-                                {clip.duration_raw || '0:00'} · {clip.game_name || 'Category: IRL'}
+                                {clip.duration_raw || '0:00'} · {clip.channel_title}
                               </span>
                               <span className="text-[9px] font-black px-3 py-1 rounded-full bg-[#7c3aed]/5 border border-[#7c3aed]/10 w-fit uppercase tracking-wider text-[#7c3aed]/60">
                                 {formatDistanceToNow(new Date(clip.created_at))} ago

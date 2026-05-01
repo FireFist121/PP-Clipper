@@ -29,7 +29,7 @@ router.get('/', async (req, res) => {
 
     // Filter by Streamer (using channel_title)
     if (streamer && streamer !== 'all') {
-      query.channel_title = streamer;
+      query.clipped_by = streamer;
     }
 
     // Filter by Duration

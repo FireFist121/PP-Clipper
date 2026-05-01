@@ -29,7 +29,7 @@ async function sendLiveClipNotification(stream, timestampedUrl, elapsedStr, cust
 
   const titleToUse = customTitle ? customTitle : stream.title;
   const cleanUser = username ? username.replace(/^@+/, '') : '';
-  const clippedBy = cleanUser ? `\nClipped by @${cleanUser}` : '';
+  const clippedBy = cleanUser ? `\nRequested by @${cleanUser}` : '';
   const content = `${stream.id} | **${titleToUse}**\n\n${elapsedStr}\n${timestampedUrl}${clippedBy}\nDelayed by -30 seconds.`;
 
   try {
