@@ -123,7 +123,6 @@ export default function App() {
       streamer: params.get('streamer') || 'all',
       from: params.get('from') || '',
       to: params.get('to') || '',
-      duration: params.get('duration') || 'any',
       sort: params.get('sort') || 'newest',
       page: parseInt(params.get('page')) || 1,
       limit: parseInt(params.get('limit')) || 20
@@ -240,7 +239,6 @@ export default function App() {
       streamer: 'all',
       from: '',
       to: '',
-      duration: 'any',
       sort: 'newest',
       page: 1,
       limit: 20
@@ -739,20 +737,6 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* Sort & Quick Presets */}
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-black text-white/20 uppercase tracking-widest ml-4">Video Duration</label>
-                    <select 
-                      value={filters.duration}
-                      onChange={e => updateFilter('duration', e.target.value)}
-                      className="w-full bg-[#0d0f12] border border-white/10 text-white rounded-2xl px-6 py-4 text-xs focus:border-[#7c3aed] outline-none appearance-none cursor-pointer hover:bg-white/5 transition-all"
-                    >
-                      <option value="any">Any Duration</option>
-                      <option value="short">Short (&lt; 4 min)</option>
-                      <option value="medium">Medium (4-20 min)</option>
-                      <option value="long">Long (&gt; 20 min)</option>
-                    </select>
-                  </div>
 
                   {/* Sort Options */}
                   <div className="space-y-3">
@@ -764,9 +748,6 @@ export default function App() {
                     >
                       <option value="newest">Newest Downloaded</option>
                       <option value="oldest">Oldest Downloaded</option>
-                      <option value="channel_az">Channel Name A-Z</option>
-                      <option value="duration">Longest Duration</option>
-                      <option value="duration_asc">Shortest Duration</option>
                     </select>
                   </div>
                 </div>
@@ -826,12 +807,6 @@ export default function App() {
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#7c3aed]/10 border border-[#7c3aed]/20 text-[10px] font-black text-[#7c3aed] uppercase tracking-wider group/tag">
                       <Icon.Calendar /> {filters.from || '...'} to {filters.to || '...'}
                       <button onClick={() => { updateFilter('from', ''); updateFilter('to', ''); }} className="opacity-40 group-hover/tag:opacity-100 transition-opacity"><Icon.Close /></button>
-                    </div>
-                  )}
-                  {filters.duration !== 'any' && (
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#7c3aed]/10 border border-[#7c3aed]/20 text-[10px] font-black text-[#7c3aed] uppercase tracking-wider group/tag">
-                      Duration: {filters.duration}
-                      <button onClick={() => removeFilter('duration')} className="opacity-40 group-hover/tag:opacity-100 transition-opacity"><Icon.Close /></button>
                     </div>
                   )}
                   <button 
