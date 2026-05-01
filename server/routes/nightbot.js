@@ -147,7 +147,9 @@ async function processLiveClipBackground(channel, customTitle, username) {
       youtube_url: timestampedUrl,
       clipped_by: username || 'Unknown',
       channel_id: channelId,
-      channel_title: channel.title
+      channel_title: channel.title,
+      duration: 0,
+      duration_raw: tsDisplay
     });
 
     logger.info(`✅ Nightbot live clip workflow finished: ${timestampedUrl}`);
@@ -169,7 +171,9 @@ async function processVideoBackground(url, customTitle, username, channel) {
         youtube_url: video.url,
         clipped_by: username || 'Unknown',
         channel_id: channel.channel_id,
-        channel_title: channel.title
+        channel_title: channel.title,
+        duration: video.duration || 0,
+        duration_raw: video.duration_raw || '0:00'
       });
     } catch (err) {
       logger.error('Error in processVideoBackground:', err.message);

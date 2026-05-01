@@ -11,6 +11,7 @@ router.get('/', async (req, res) => {
       from, 
       to, 
       search, 
+      duration,
       sort = 'newest', 
       page = 1, 
       limit = 20 
@@ -29,6 +30,13 @@ router.get('/', async (req, res) => {
     // Filter by Streamer (using channel_title)
     if (streamer && streamer !== 'all') {
       query.channel_title = streamer;
+    }
+
+    // Filter by Duration
+    if (duration && duration !== 'any') {
+      if (duration === 'short') query.duration = { $lt: 240 };
+      else if (duration === 'medium') query.duration = { $gte: 240, $lte: 1200 };
+      else if (duration === 'long') query.duration = { $gt: 1200 };
     }
 
     // Filter by Date Range
@@ -60,6 +68,8 @@ router.get('/', async (req, res) => {
     let sortOptions = { created_at: -1 };
     if (sort === 'oldest') sortOptions = { created_at: 1 };
     if (sort === 'channel_az') sortOptions = { channel_title: 1 };
+    if (sort === 'duration') sortOptions = { duration: -1 };
+    if (sort === 'duration_asc') sortOptions = { duration: 1 };
 
     // Pagination
     const skip = (parseInt(page) - 1) * parseInt(limit);

@@ -178,12 +178,31 @@ class YouTubeClient {
   _normalizeVideoFull(item) {
     const base = this._normalizeVideo(item);
     const stats = item.statistics || {};
+    const { seconds, display } = this._parseDuration(item.contentDetails?.duration);
     return {
       ...base,
       viewCount: parseInt(stats.viewCount || '0', 10),
       likeCount: parseInt(stats.likeCount || '0', 10),
-      duration: item.contentDetails?.duration,
+      duration: seconds,
+      duration_raw: display,
     };
+  }
+
+  _parseDuration(iso) {
+    if (!iso) return { seconds: 0, display: '0:00' };
+    const match = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+    if (!match) return { seconds: 0, display: '0:00' };
+    
+    const h = parseInt(match[1] || '0', 10);
+    const m = parseInt(match[2] || '0', 10);
+    const s = parseInt(match[3] || '0', 10);
+    
+    const totalSeconds = h * 3600 + m * 60 + s;
+    const display = h > 0 
+      ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+      : `${m}:${String(s).padStart(2, '0')}`;
+      
+    return { seconds: totalSeconds, display };
   }
 
   async getChannelInfo(channelId) {

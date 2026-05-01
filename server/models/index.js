@@ -8,6 +8,8 @@ const ClipSchema = new mongoose.Schema({
   channel_id: String,
   channel_title: String,
   game_name: String,
+  duration: Number, // Seconds
+  duration_raw: String, // HH:MM:SS
   created_at: { type: Date, default: Date.now }
 });
 

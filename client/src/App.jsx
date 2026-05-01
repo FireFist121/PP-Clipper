@@ -123,6 +123,7 @@ export default function App() {
       streamer: params.get('streamer') || 'all',
       from: params.get('from') || '',
       to: params.get('to') || '',
+      duration: params.get('duration') || 'any',
       sort: params.get('sort') || 'newest',
       page: parseInt(params.get('page')) || 1,
       limit: parseInt(params.get('limit')) || 20
@@ -239,6 +240,7 @@ export default function App() {
       streamer: 'all',
       from: '',
       to: '',
+      duration: 'any',
       sort: 'newest',
       page: 1,
       limit: 20
@@ -715,15 +717,32 @@ export default function App() {
 
                   {/* Sort & Quick Presets */}
                   <div className="space-y-3">
+                    <label className="text-[10px] font-black text-white/20 uppercase tracking-widest ml-4">Video Duration</label>
+                    <select 
+                      value={filters.duration}
+                      onChange={e => updateFilter('duration', e.target.value)}
+                      className="w-full bg-white/[0.03] border border-white/10 text-white rounded-2xl px-6 py-4 text-xs focus:border-[#7c3aed] outline-none appearance-none cursor-pointer hover:bg-white/5 transition-all"
+                    >
+                      <option value="any">Any Duration</option>
+                      <option value="short">Short (&lt; 4 min)</option>
+                      <option value="medium">Medium (4-20 min)</option>
+                      <option value="long">Long (&gt; 20 min)</option>
+                    </select>
+                  </div>
+
+                  {/* Sort Options */}
+                  <div className="space-y-3">
                     <label className="text-[10px] font-black text-white/20 uppercase tracking-widest ml-4">Sorting Order</label>
                     <select 
                       value={filters.sort}
                       onChange={e => updateFilter('sort', e.target.value)}
                       className="w-full bg-white/[0.03] border border-white/10 text-white rounded-2xl px-6 py-4 text-xs focus:border-[#7c3aed] outline-none appearance-none cursor-pointer hover:bg-white/5 transition-all"
                     >
-                      <option value="newest">Newest First</option>
-                      <option value="oldest">Oldest First</option>
+                      <option value="newest">Newest Downloaded</option>
+                      <option value="oldest">Oldest Downloaded</option>
                       <option value="channel_az">Channel Name A-Z</option>
+                      <option value="duration">Longest Duration</option>
+                      <option value="duration_asc">Shortest Duration</option>
                     </select>
                   </div>
                 </div>
@@ -785,6 +804,12 @@ export default function App() {
                       <button onClick={() => { updateFilter('from', ''); updateFilter('to', ''); }} className="opacity-40 group-hover/tag:opacity-100 transition-opacity"><Icon.Close /></button>
                     </div>
                   )}
+                  {filters.duration !== 'any' && (
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#7c3aed]/10 border border-[#7c3aed]/20 text-[10px] font-black text-[#7c3aed] uppercase tracking-wider group/tag">
+                      Duration: {filters.duration}
+                      <button onClick={() => removeFilter('duration')} className="opacity-40 group-hover/tag:opacity-100 transition-opacity"><Icon.Close /></button>
+                    </div>
+                  )}
                   <button 
                     onClick={clearFilters}
                     className="text-[10px] font-black text-rose-400 hover:text-rose-500 transition-colors uppercase tracking-widest ml-auto"
@@ -843,7 +868,7 @@ export default function App() {
                           <td className="py-8 px-10">
                             <div className="flex flex-col gap-2">
                               <span className="text-[9px] font-black px-3 py-1 rounded-full bg-white/5 border border-white/5 w-fit uppercase tracking-wider text-white/40">
-                                {clip.game_name || 'Category: IRL'}
+                                {clip.duration_raw || '0:00'} · {clip.game_name || 'Category: IRL'}
                               </span>
                               <span className="text-[9px] font-black px-3 py-1 rounded-full bg-[#7c3aed]/5 border border-[#7c3aed]/10 w-fit uppercase tracking-wider text-[#7c3aed]/60">
                                 {formatDistanceToNow(new Date(clip.created_at))} ago
