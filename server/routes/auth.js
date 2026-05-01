@@ -34,14 +34,22 @@ router.post('/login', async (req, res) => {
 
     // Parse device info
     const ua = uaparser(req.headers['user-agent']);
-    const deviceInfo = `${ua.browser.name || 'Unknown Browser'} on ${ua.os.name || 'Unknown OS'}${ua.device.model ? ` (${ua.device.model})` : ''}`;
+    const browserName = ua.browser.name || 'Unknown Browser';
+    const browserVersion = ua.browser.version ? ` ${ua.browser.major || ua.browser.version || ''}` : '';
+    const osName = ua.os.name || 'Unknown OS';
+    const osVersion = ua.os.version ? ` ${ua.os.version}` : '';
+    const deviceModel = ua.device.model ? ` (${ua.device.model})` : '';
+    const deviceInfo = `${browserName}${browserVersion} on ${osName}${osVersion}${deviceModel}`.trim();
+
+    // Capture real IP
+    const ipAddress = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '::1').split(',')[0].trim();
 
     // Store refresh token
     await RefreshToken.create({
       userId: user._id,
       tokenHash: hashToken(refreshToken),
       deviceInfo,
-      ipAddress: req.ip || req.headers['x-forwarded-for'],
+      ipAddress,
       expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
     });
 
@@ -81,8 +89,19 @@ router.get('/refresh', async (req, res) => {
     const newRefreshToken = signRefreshToken(decoded.userId);
 
     // Update stored token
+    const ua = uaparser(req.headers['user-agent']);
+    const browserName = ua.browser.name || 'Unknown Browser';
+    const browserVersion = ua.browser.version ? ` ${ua.browser.major || ua.browser.version || ''}` : '';
+    const osName = ua.os.name || 'Unknown OS';
+    const osVersion = ua.os.version ? ` ${ua.os.version}` : '';
+    const deviceModel = ua.device.model ? ` (${ua.device.model})` : '';
+    const deviceInfo = `${browserName}${browserVersion} on ${osName}${osVersion}${deviceModel}`.trim();
+    const ipAddress = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '::1').split(',')[0].trim();
+
     storedToken.tokenHash = hashToken(newRefreshToken);
     storedToken.lastUsedAt = new Date();
+    storedToken.deviceInfo = deviceInfo;
+    storedToken.ipAddress = ipAddress;
     await storedToken.save();
 
     res.cookie('refreshToken', newRefreshToken, {
