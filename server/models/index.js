@@ -5,6 +5,9 @@ const ClipSchema = new mongoose.Schema({
   title: String,
   youtube_url: String,
   clipped_by: String,
+  channel_id: String,
+  channel_title: String,
+  game_name: String,
   created_at: { type: Date, default: Date.now }
 });
 

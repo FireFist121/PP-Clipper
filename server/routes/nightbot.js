@@ -57,7 +57,7 @@ router.get('/clip', async (req, res) => {
     }
 
     res.send('✅ Processing specific clip url...');
-    return processVideoBackground(finalUrl, finalUrl === title ? '' : title, user).catch(err => logger.error(err));
+    return processVideoBackground(finalUrl, finalUrl === title ? '' : title, user, channel).catch(err => logger.error(err));
   }
 
   // 5. Check if channel is paused
@@ -100,13 +100,14 @@ router.get('/clip', async (req, res) => {
   res.send('🎬 Clipping live stream! Sending to Discord...');
 
   // 7. Perform metadata fetch and webhook post asynchronously in the background
-  processLiveClipBackground(channelId, title, user).catch(err => {
+  processLiveClipBackground(channel, title, user).catch(err => {
     logger.error('Background live clip failed:', err.message);
   });
 });
 
-async function processLiveClipBackground(channelId, customTitle, username) {
+async function processLiveClipBackground(channel, customTitle, username) {
   try {
+    const channelId = channel.channel_id;
     logger.info(`Nightbot requested live clip for channel: ${channelId} by user: ${username || 'Unknown'}`);
     
     // 1. Fetch active live stream
@@ -145,6 +146,8 @@ async function processLiveClipBackground(channelId, customTitle, username) {
       title: customTitle || stream.title,
       youtube_url: timestampedUrl,
       clipped_by: username || 'Unknown',
+      channel_id: channelId,
+      channel_title: channel.title
     });
 
     logger.info(`✅ Nightbot live clip workflow finished: ${timestampedUrl}`);
@@ -154,7 +157,7 @@ async function processLiveClipBackground(channelId, customTitle, username) {
   }
 }
 
-async function processVideoBackground(url, customTitle, username) {
+async function processVideoBackground(url, customTitle, username, channel) {
     try {
       const video = await youtube.getVideoByUrl(url);
       await notifications.sendLiveClipNotification(video, video.url, '00:00', customTitle, username);
@@ -165,6 +168,8 @@ async function processVideoBackground(url, customTitle, username) {
         title: customTitle || video.title,
         youtube_url: video.url,
         clipped_by: username || 'Unknown',
+        channel_id: channel.channel_id,
+        channel_title: channel.title
       });
     } catch (err) {
       logger.error('Error in processVideoBackground:', err.message);

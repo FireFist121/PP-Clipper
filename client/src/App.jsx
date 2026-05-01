@@ -70,6 +70,31 @@ const Icon = {
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
     </svg>
+  ),
+  Filter: () => (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+    </svg>
+  ),
+  ChevronDown: () => (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="6 9 12 15 18 9"/>
+    </svg>
+  ),
+  ChevronLeft: () => (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="15 18 9 12 15 6"/>
+    </svg>
+  ),
+  ChevronRight: () => (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="9 18 15 12 9 6"/>
+    </svg>
+  ),
+  Calendar: () => (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+    </svg>
   )
 };
 
@@ -80,8 +105,6 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [suspiciousLogs, setSuspiciousLogs] = useState([]);
   const [blockedIps, setBlockedIps] = useState([]);
-  const [search, setSearch] = useState('');
-  const [filterBy, setFilterBy] = useState('all');
   const [activeTab, setActiveTab] = useState('dashboard');
   const [channels, setChannels] = useState([]);
   const [newChannelUrl, setNewChannelUrl] = useState('');
@@ -91,6 +114,29 @@ export default function App() {
   const [setupModal, setSetupModal] = useState(null);
   const [serverUrl, setServerUrl] = useState('');
 
+  // Filtering & Pagination State
+  const [filters, setFilters] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return {
+      search: params.get('search') || '',
+      channel: params.get('channel') || 'all',
+      streamer: params.get('streamer') || 'all',
+      from: params.get('from') || '',
+      to: params.get('to') || '',
+      sort: params.get('sort') || 'newest',
+      page: parseInt(params.get('page')) || 1,
+      limit: parseInt(params.get('limit')) || 20
+    };
+  });
+
+  const [filterData, setFilterData] = useState({
+    totalCount: 0,
+    channels: [],
+    streamers: []
+  });
+
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+
   useEffect(() => {
     const host = window.location.origin.replace(':5173', ':3000').replace(':5174', ':3000');
     setServerUrl(host);
@@ -98,29 +144,55 @@ export default function App() {
 
   useEffect(() => {
     if (user) {
-      fetchData();
+      const handler = setTimeout(() => {
+        fetchData();
+        // Sync URL
+        const params = new URLSearchParams();
+        Object.entries(filters).forEach(([k, v]) => {
+          if (v && v !== 'all' && v !== 1 && v !== 20) params.set(k, v);
+        });
+        const newUrl = params.toString() ? `${window.location.pathname}?${params.toString()}` : window.location.pathname;
+        window.history.replaceState({}, '', newUrl);
+      }, 300);
+      return () => clearTimeout(handler);
+    }
+  }, [user, filters]);
+
+  // Interval refresh (less frequent)
+  useEffect(() => {
+    if (user) {
       const interval = setInterval(() => {
         fetchData();
-      }, 15000);
+      }, 30000);
       return () => clearInterval(interval);
     }
-  }, [user]);
+  }, [user, filters]);
 
   const fetchData = async () => {
     try {
+      const params = new URLSearchParams();
+      Object.entries(filters).forEach(([k, v]) => {
+        if (v && v !== 'all') params.set(k, v);
+      });
+
       const [sRes, cRes, lRes, bRes, slRes] = await Promise.all([
         api.get('/api/stats'),
         api.get('/api/channels'),
-        api.get('/api/clips'),
+        api.get(`/api/clips?${params.toString()}`),
         api.get('/api/channels/blacklist'),
         api.get('/api/channels/suspicious')
       ]);
       setStats(sRes.data);
       setChannels(cRes.data);
-      setClips(lRes.data);
+      setClips(lRes.data.clips);
+      setFilterData({
+        totalCount: lRes.data.totalCount,
+        channels: lRes.data.channels,
+        streamers: lRes.data.streamers
+      });
       setBlockedIps(bRes.data);
       setSuspiciousLogs(slRes.data);
-      buildChartData(lRes.data);
+      buildChartData(lRes.data.clips);
     } catch (err) {
       console.error('Fetch Error:', err);
     } finally {
@@ -152,19 +224,26 @@ export default function App() {
     setChartData(Object.entries(days).map(([day, clips]) => ({ day, clips })));
   };
 
-  const filteredClips = useMemo(() => {
-    return clips.filter((c) => {
-      const matchSearch =
-        c.title?.toLowerCase().includes(search.toLowerCase()) ||
-        c.clipped_by?.toLowerCase().includes(search.toLowerCase()) ||
-        c.video_id?.toLowerCase().includes(search.toLowerCase());
-      const matchFilter =
-        filterBy === 'all' ||
-        (filterBy === 'named' && c.clipped_by && c.clipped_by !== 'Unknown') ||
-        (filterBy === 'unknown' && (!c.clipped_by || c.clipped_by === 'Unknown'));
-      return matchSearch && matchFilter;
+  const updateFilter = (key, value) => {
+    setFilters(prev => ({ ...prev, [key]: value, page: key === 'page' ? value : 1 }));
+  };
+
+  const removeFilter = (key) => {
+    updateFilter(key, key === 'page' ? 1 : key === 'limit' ? 20 : (key === 'sort' ? 'newest' : (key === 'channel' || key === 'streamer' ? 'all' : '')));
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      search: '',
+      channel: 'all',
+      streamer: 'all',
+      from: '',
+      to: '',
+      sort: 'newest',
+      page: 1,
+      limit: 20
     });
-  }, [clips, search, filterBy]);
+  };
 
   const handleCopy = (clip) => {
     navigator.clipboard.writeText(clip.youtube_url || `https://youtube.com/watch?v=${clip.video_id}`);
@@ -541,16 +620,38 @@ export default function App() {
             </div>
 
             <div className={`${glassCard} glow-border group/card stagger-2`}>
+              {/* Header & Main Search */}
               <div className="p-10 border-b border-white/5 flex flex-wrap gap-8 justify-between items-center bg-white/[0.01]">
                 <div className="space-y-1">
                   <h2 className="text-xl font-black tracking-tight uppercase" style={{ fontFamily: "'Syne', sans-serif" }}>GENERATED ARCHIVE</h2>
-                  <p className="text-[9px] font-black text-[#7c3aed] tracking-[0.3em] uppercase">Private Cloud Storage</p>
+                  <div className="flex items-center gap-3">
+                    <p className="text-[9px] font-black text-[#7c3aed] tracking-[0.3em] uppercase">Private Cloud Storage</p>
+                    <span className="w-1 h-1 rounded-full bg-white/10" />
+                    <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">{filterData.totalCount} Results Found</span>
+                  </div>
                 </div>
+                
                 <div className="flex items-center gap-4">
                   <div className="relative group/search">
-                    <input type="text" placeholder="Search data..." value={search} onChange={e => setSearch(e.target.value)} className={`${inputCls} w-72 !pl-14`} />
+                    <input 
+                      type="text" 
+                      placeholder="Search title, streamer..." 
+                      value={filters.search} 
+                      onChange={e => updateFilter('search', e.target.value)} 
+                      className={`${inputCls} w-72 !pl-14`} 
+                    />
                     <div className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/search:text-[#7c3aed] transition-colors"><Icon.Search /></div>
                   </div>
+                  
+                  <button 
+                    onClick={() => setIsFilterOpen(!isFilterOpen)}
+                    className={`h-12 px-6 rounded-2xl border transition-all duration-500 flex items-center gap-3 text-[9px] font-black uppercase tracking-widest ${isFilterOpen ? 'bg-[#7c3aed] border-[#7c3aed] text-white shadow-[0_10px_30px_rgba(124,58,237,0.3)]' : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10'}`}
+                  >
+                    <Icon.Filter />
+                    <span>Filters</span>
+                    <div className={`transition-transform duration-500 ${isFilterOpen ? 'rotate-180' : ''}`}><Icon.ChevronDown /></div>
+                  </button>
+
                   <button 
                     onClick={deleteAllClips} 
                     className="h-12 px-6 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[9px] font-black uppercase tracking-[0.2em] hover:bg-rose-500 hover:text-white transition-all duration-700 active:scale-95"
@@ -559,30 +660,282 @@ export default function App() {
                   </button>
                 </div>
               </div>
+
+              {/* Collapsible Filter Bar */}
+              <div className={`overflow-hidden transition-all duration-700 ease-in-out ${isFilterOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                <div className="p-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 bg-white/[0.005] border-b border-white/5">
+                  {/* Channel Filter */}
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black text-white/20 uppercase tracking-widest ml-4">Channel Origin</label>
+                    <select 
+                      value={filters.channel}
+                      onChange={e => updateFilter('channel', e.target.value)}
+                      className="w-full bg-white/[0.03] border border-white/10 text-white rounded-2xl px-6 py-4 text-xs focus:border-[#7c3aed] outline-none appearance-none cursor-pointer hover:bg-white/5 transition-all"
+                    >
+                      <option value="all">All Channels</option>
+                      {filterData.channels.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </div>
+
+                  {/* Streamer Filter */}
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black text-white/20 uppercase tracking-widest ml-4">Streamer / User</label>
+                    <select 
+                      value={filters.streamer}
+                      onChange={e => updateFilter('streamer', e.target.value)}
+                      className="w-full bg-white/[0.03] border border-white/10 text-white rounded-2xl px-6 py-4 text-xs focus:border-[#7c3aed] outline-none appearance-none cursor-pointer hover:bg-white/5 transition-all"
+                    >
+                      <option value="all">All Streamers</option>
+                      {filterData.streamers.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </div>
+
+                  {/* Date Range */}
+                  <div className="space-y-3 lg:col-span-1">
+                    <label className="text-[10px] font-black text-white/20 uppercase tracking-widest ml-4">Capture Period</label>
+                    <div className="flex gap-3">
+                      <div className="relative flex-1">
+                        <input 
+                          type="date" 
+                          value={filters.from}
+                          onChange={e => updateFilter('from', e.target.value)}
+                          className="w-full bg-white/[0.03] border border-white/10 text-white rounded-2xl px-5 py-4 text-[10px] focus:border-[#7c3aed] outline-none [color-scheme:dark]"
+                        />
+                      </div>
+                      <div className="relative flex-1">
+                        <input 
+                          type="date" 
+                          value={filters.to}
+                          onChange={e => updateFilter('to', e.target.value)}
+                          className="w-full bg-white/[0.03] border border-white/10 text-white rounded-2xl px-5 py-4 text-[10px] focus:border-[#7c3aed] outline-none [color-scheme:dark]"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Sort & Quick Presets */}
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black text-white/20 uppercase tracking-widest ml-4">Sorting Order</label>
+                    <select 
+                      value={filters.sort}
+                      onChange={e => updateFilter('sort', e.target.value)}
+                      className="w-full bg-white/[0.03] border border-white/10 text-white rounded-2xl px-6 py-4 text-xs focus:border-[#7c3aed] outline-none appearance-none cursor-pointer hover:bg-white/5 transition-all"
+                    >
+                      <option value="newest">Newest First</option>
+                      <option value="oldest">Oldest First</option>
+                      <option value="channel_az">Channel Name A-Z</option>
+                    </select>
+                  </div>
+                </div>
+                
+                {/* Quick Date Presets */}
+                <div className="px-10 py-4 bg-white/[0.01] border-b border-white/5 flex gap-4 overflow-x-auto custom-scrollbar no-scrollbar">
+                  {[
+                    { label: 'Today', days: 0 },
+                    { label: 'Last 7 Days', days: 7 },
+                    { label: 'Last 30 Days', days: 30 },
+                    { label: 'All Time', reset: true }
+                  ].map(p => (
+                    <button
+                      key={p.label}
+                      onClick={() => {
+                        if (p.reset) {
+                          updateFilter('from', '');
+                          updateFilter('to', '');
+                        } else {
+                          const date = new Date();
+                          date.setDate(date.getDate() - p.days);
+                          updateFilter('from', date.toISOString().split('T')[0]);
+                          updateFilter('to', new Date().toISOString().split('T')[0]);
+                        }
+                      }}
+                      className="whitespace-nowrap px-4 py-2 rounded-xl bg-white/5 border border-white/5 text-[9px] font-black uppercase tracking-widest text-white/40 hover:bg-[#7c3aed]/20 hover:text-[#7c3aed] hover:border-[#7c3aed]/30 transition-all"
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Active Filter Tags */}
+              {Object.entries(filters).some(([k, v]) => v && v !== 'all' && k !== 'page' && k !== 'limit' && k !== 'sort') && (
+                <div className="px-10 py-6 border-b border-white/5 flex flex-wrap items-center gap-4 bg-white/[0.005]">
+                  <div className="text-[9px] font-black text-white/10 uppercase tracking-widest mr-2">Active Filters:</div>
+                  {filters.search && (
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#7c3aed]/10 border border-[#7c3aed]/20 text-[10px] font-black text-[#7c3aed] uppercase tracking-wider group/tag">
+                      Search: {filters.search}
+                      <button onClick={() => removeFilter('search')} className="opacity-40 group-hover/tag:opacity-100 transition-opacity"><Icon.Close /></button>
+                    </div>
+                  )}
+                  {filters.channel !== 'all' && (
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#7c3aed]/10 border border-[#7c3aed]/20 text-[10px] font-black text-[#7c3aed] uppercase tracking-wider group/tag">
+                      Channel: {filters.channel}
+                      <button onClick={() => removeFilter('channel')} className="opacity-40 group-hover/tag:opacity-100 transition-opacity"><Icon.Close /></button>
+                    </div>
+                  )}
+                  {filters.streamer !== 'all' && (
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#7c3aed]/10 border border-[#7c3aed]/20 text-[10px] font-black text-[#7c3aed] uppercase tracking-wider group/tag">
+                      Streamer: {filters.streamer}
+                      <button onClick={() => removeFilter('streamer')} className="opacity-40 group-hover/tag:opacity-100 transition-opacity"><Icon.Close /></button>
+                    </div>
+                  )}
+                  {(filters.from || filters.to) && (
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#7c3aed]/10 border border-[#7c3aed]/20 text-[10px] font-black text-[#7c3aed] uppercase tracking-wider group/tag">
+                      <Icon.Calendar /> {filters.from || '...'} to {filters.to || '...'}
+                      <button onClick={() => { updateFilter('from', ''); updateFilter('to', ''); }} className="opacity-40 group-hover/tag:opacity-100 transition-opacity"><Icon.Close /></button>
+                    </div>
+                  )}
+                  <button 
+                    onClick={clearFilters}
+                    className="text-[10px] font-black text-rose-400 hover:text-rose-500 transition-colors uppercase tracking-widest ml-auto"
+                  >
+                    Clear All
+                  </button>
+                </div>
+              )}
+
+              {/* Table Body */}
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
                   <thead className="bg-white/5">
                     <tr>
-                      <th className="py-4 px-8 text-[10px] font-bold uppercase tracking-widest text-[#8a9bb0]">Details</th>
-                      <th className="py-4 px-8 text-[10px] font-bold uppercase tracking-widest text-[#8a9bb0]">Actions</th>
+                      <th className="py-6 px-10 text-[10px] font-black uppercase tracking-widest text-white/30 border-b border-white/5">Clip Information</th>
+                      <th className="py-6 px-10 text-[10px] font-black uppercase tracking-widest text-white/30 border-b border-white/5">Channel / Streamer</th>
+                      <th className="py-6 px-10 text-[10px] font-black uppercase tracking-widest text-white/30 border-b border-white/5">Metadata</th>
+                      <th className="py-6 px-10 text-[10px] font-black uppercase tracking-widest text-white/30 border-b border-white/5 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y border-white/5">
-                    {filteredClips.map((clip, i) => (
-                      <tr key={i} className="group hover:bg-white/[0.02]">
-                        <td className="py-5 px-8">
-                          <div className="text-sm font-bold">{clip.title}</div>
-                          <div className="text-[10px] text-[#4a5568]">@{clip.clipped_by}</div>
-                        </td>
-                        <td className="py-5 px-8 flex gap-3">
-                          <button onClick={() => handleCopy(clip)} className="p-2 bg-white/5 rounded-lg hover:bg-[#3b82f6] transition-all">{copiedId === clip.video_id ? <Icon.Check /> : <Icon.Copy />}</button>
-                          <a href={clip.youtube_url} target="_blank" className="p-2 bg-white/5 rounded-lg hover:bg-white/10"><Icon.ExternalLink /></a>
-                          <button onClick={() => deleteClip(clip._id)} className="p-2 bg-white/5 rounded-lg hover:bg-rose-500/20 text-rose-500/40 hover:text-rose-500 transition-all"><Icon.Trash /></button>
+                    {clips.length === 0 ? (
+                      <tr>
+                        <td colSpan="4" className="py-32 text-center">
+                          <div className="flex flex-col items-center gap-4 opacity-10">
+                            <Icon.Clip size={64} />
+                            <div className="text-[10px] font-black uppercase tracking-[0.5em]">No clips match your search filters</div>
+                          </div>
                         </td>
                       </tr>
-                    ))}
+                    ) : (
+                      clips.map((clip, i) => (
+                        <tr key={clip._id || i} className="group hover:bg-white/[0.02] transition-colors">
+                          <td className="py-8 px-10">
+                            <div className="flex items-center gap-6">
+                              <div className="relative w-32 aspect-video rounded-xl overflow-hidden border border-white/5 flex-shrink-0">
+                                <img src={`https://img.youtube.com/vi/${clip.video_id}/mqdefault.jpg`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                              </div>
+                              <div className="space-y-1">
+                                <div className="text-sm font-black text-white group-hover:text-[#7c3aed] transition-colors line-clamp-1">{clip.title}</div>
+                                <div className="text-[10px] font-bold text-white/20 uppercase tracking-widest flex items-center gap-2">
+                                  <span>{clip.video_id}</span>
+                                  <span className="w-1 h-1 rounded-full bg-white/5" />
+                                  <span>{new Date(clip.created_at).toLocaleDateString()}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-8 px-10">
+                            <div className="space-y-1">
+                              <div className="text-xs font-black text-white/80 uppercase tracking-tight">{clip.channel_title || 'Unknown Channel'}</div>
+                              <div className="text-[10px] font-bold text-[#7c3aed] uppercase tracking-widest">Clipped by @{clip.clipped_by}</div>
+                            </div>
+                          </td>
+                          <td className="py-8 px-10">
+                            <div className="flex flex-col gap-2">
+                              <span className="text-[9px] font-black px-3 py-1 rounded-full bg-white/5 border border-white/5 w-fit uppercase tracking-wider text-white/40">
+                                {clip.game_name || 'Category: IRL'}
+                              </span>
+                              <span className="text-[9px] font-black px-3 py-1 rounded-full bg-[#7c3aed]/5 border border-[#7c3aed]/10 w-fit uppercase tracking-wider text-[#7c3aed]/60">
+                                {formatDistanceToNow(new Date(clip.created_at))} ago
+                              </span>
+                            </div>
+                          </td>
+                          <td className="py-8 px-10">
+                            <div className="flex justify-end gap-3">
+                              <button 
+                                onClick={() => handleCopy(clip)} 
+                                className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center hover:bg-[#7c3aed] transition-all text-white/40 hover:text-white border border-white/5"
+                                title="Copy Link"
+                              >
+                                {copiedId === clip.video_id ? <Icon.Check /> : <Icon.Copy />}
+                              </button>
+                              <a 
+                                href={clip.youtube_url} 
+                                target="_blank" 
+                                className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center hover:bg-cyan-400/20 text-white/40 hover:text-cyan-400 transition-all border border-white/5"
+                                title="Open on YouTube"
+                              >
+                                <Icon.ExternalLink />
+                              </a>
+                              <button 
+                                onClick={() => deleteClip(clip._id)} 
+                                className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center hover:bg-rose-500/20 text-white/20 hover:text-rose-500 transition-all border border-white/5"
+                                title="Delete Permanently"
+                              >
+                                <Icon.Trash />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
+              </div>
+
+              {/* Pagination Footer */}
+              <div className="p-10 border-t border-white/5 flex flex-wrap justify-between items-center bg-white/[0.005] gap-6">
+                <div className="flex items-center gap-6">
+                  <div className="flex items-center gap-3">
+                    <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">Rows per page:</span>
+                    <select 
+                      value={filters.limit}
+                      onChange={e => updateFilter('limit', parseInt(e.target.value))}
+                      className="bg-white/5 border border-white/10 text-white text-[10px] font-black rounded-lg px-3 py-1.5 outline-none focus:border-[#7c3aed]"
+                    >
+                      {[10, 20, 50, 100].map(v => <option key={v} value={v}>{v}</option>)}
+                    </select>
+                  </div>
+                  <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">
+                    Showing {(filters.page - 1) * filters.limit + 1} - {Math.min(filters.page * filters.limit, filterData.totalCount)} of {filterData.totalCount}
+                  </span>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <button 
+                    disabled={filters.page === 1}
+                    onClick={() => updateFilter('page', filters.page - 1)}
+                    className="w-10 h-10 rounded-xl border border-white/10 flex items-center justify-center text-white/40 hover:bg-white/5 disabled:opacity-20 disabled:cursor-not-allowed transition-all"
+                  >
+                    <Icon.ChevronLeft />
+                  </button>
+                  
+                  {/* Page Numbers */}
+                  <div className="flex items-center gap-2 px-2">
+                    {Array.from({ length: Math.min(5, Math.ceil(filterData.totalCount / filters.limit)) }, (_, i) => {
+                      const p = i + 1;
+                      // Simple pagination logic: show first few pages
+                      return (
+                        <button
+                          key={p}
+                          onClick={() => updateFilter('page', p)}
+                          className={`w-10 h-10 rounded-xl text-[10px] font-black transition-all ${filters.page === p ? 'bg-[#7c3aed] text-white shadow-[0_10px_20px_rgba(124,58,237,0.3)]' : 'text-white/40 hover:bg-white/5'}`}
+                        >
+                          {p}
+                        </button>
+                      );
+                    })}
+                    {Math.ceil(filterData.totalCount / filters.limit) > 5 && <span className="text-white/10 mx-2">...</span>}
+                  </div>
+
+                  <button 
+                    disabled={filters.page >= Math.ceil(filterData.totalCount / filters.limit)}
+                    onClick={() => updateFilter('page', filters.page + 1)}
+                    className="w-10 h-10 rounded-xl border border-white/10 flex items-center justify-center text-white/40 hover:bg-white/5 disabled:opacity-20 disabled:cursor-not-allowed transition-all"
+                  >
+                    <Icon.ChevronRight />
+                  </button>
+                </div>
               </div>
             </div>
 
